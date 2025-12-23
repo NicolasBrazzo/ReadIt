@@ -7,7 +7,7 @@ const booksRoutes = require("./routes/books.routes"); // ✅ AGGIUNGI
 const app = express();
 const PORT = process.env.PORT || 5500;
 
-// ✅ 1. PRIMA express.json() e urlencoded
+// ✅ 1. PRIMA express.json() e urlencoded  
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

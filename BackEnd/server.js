@@ -24,6 +24,10 @@ app.use(cors({
 // ✅ 3. POI cookieParser
 app.use(cookieParser());
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // ✅ 4. INFINE le rotte
 app.use('/', authRoutes);
 app.use('/books', booksRoutes);

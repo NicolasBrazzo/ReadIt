@@ -12,11 +12,6 @@ const {
   removeBook
 } = require('../controllers/books.controller');
 
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
-});
-
-
 // ⚠️ IMPORTANTE: Tutte le rotte books sono protette (serve login)
 router.use(authMiddleware);
 

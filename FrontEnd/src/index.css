@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+:root {
+  --bg-body: #000000;
+  --text-color: #ffffff;
+  --primary: #f6330f;
+}
+
+@theme {
+  --color-primary: #f6330f;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-body);
+  color: var(--text-color);
+}
+
+label {
+  @apply text-[18px];
+  font-family: "Comfortaa";
+}
+
+input {
+  /* @apply   p-2 border border-slate-500 rounded-xl; */
+  @apply border p-2 rounded bg-black/90 block
+}
+
+button {
+  cursor: pointer;
+}
+
+
+/* Utility personalizzate */
+@layer utilities {
+    .flex-center {
+        @apply flex items-center;
+    }
+
+    .flex-center-center {
+        @apply flex justify-center items-center;
+    }
+
+    .flex-center-around {
+        @apply flex justify-around items-center;
+    }
+    
+    .flex-center-col {
+        @apply flex flex-col justify-center items-center;
+    }
+    
+    .flex-center-between {
+        @apply flex items-center justify-between;
+    }
+    
+    .flex-div-full {
+        @apply flex items-center flex-1;
+    }
+
+    .text-full-center {
+      @apply w-full text-center
+    }
+}
+
+/* COMPONENTS */
+/* add book form  */
+#addBookForm input {
+  @apply w-full mb-6 mt-3
+}
+
+/* NAVBAR */
+.link:hover .line-navbar {
+  display: block;
+  width: 100%;
+}
+
+.line-navbar {
+  display: block;
+  width: 0;
+  height: 2px;
+  background: white;
+  transition: width 0.5s ease-out;
+}
+
+/* HERO SECTION */
+#hero-section {
+  background-image: url("./assets/hero-bg.png");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.circle,
+.circle-cta {
+  border-radius: 100%;
+}
+
+.circle {
+  background: var(--primary);
+}
+
+.circle-cta {
+  background: var(--text-color);
+}
+
+#usage-section {
+  background-image: url("./assets/usage-bg.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.line-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  position: absolute;
+  z-index: -1;
+  gap: 20px;
+  height: 100%;
+  width: 100%;
+}
+
+.line {
+  height: 100%;
+  width: 1px;
+  background: rgba(128, 128, 128, 0.333);
+}

@@ -5,7 +5,7 @@ const authRoutes = require("./routes/auth.routes");
 const booksRoutes = require("./routes/books.routes"); // ✅ AGGIUNGI
 
 const app = express();
-const PORT = process.env.PORT || 5500;
+const PORT = process.env.PORT;
 
 // ✅ 1. PRIMA express.json() e urlencoded  
 app.use(express.json());

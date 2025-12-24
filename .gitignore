@@ -33,5 +33,4 @@ Thumbs.db
 # Frontend specific
 
 # Backend specific
-backend/config/
 backend/.env

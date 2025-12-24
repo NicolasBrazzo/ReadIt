@@ -12,10 +12,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ 2. POI CORS
+const allowedOrigins = process.env.FRONTEND_URL 
+  ? [process.env.FRONTEND_URL] 
+  : [];
+
+// Aggiungi sempre localhost per sviluppo
+allowedOrigins.push(
+  'http://localhost:5173',
+  'http://localhost:5500', 
+  'http://localhost:3000'
+);
+
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL, // es: https://readit.vercel.app
-  ],
+  origin: allowedOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],

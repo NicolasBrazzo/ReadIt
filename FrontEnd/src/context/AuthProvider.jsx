@@ -45,6 +45,7 @@ export function AuthProvider({ children }) {
       console.log("📤 Sending credentials:", credentials);
 
       const res = await axios.post(`${API_URL}/register`, credentials, {
+        withCredentials: true,
         headers: {
           "Content-Type": "application/json",
         },
@@ -53,9 +54,9 @@ export function AuthProvider({ children }) {
       console.log("📥 Response:", res.data);
 
       if (res.data?.message === "Success") {
-        const me = await axios.get(`${API_URL}/me`, {withCredentials: true});
+        const me = await axios.get(`${API_URL}/me`, { withCredentials: true });
         if (me.data?.authenticated) {
-          console.log(me.data.user, "USER DATA");
+          console.log(me.data.user, "USER  DATA");
           setUser(me.data.user);
           return { ok: true };
         }
@@ -70,9 +71,11 @@ export function AuthProvider({ children }) {
   // LOGIN
   const login = async (credentials) => {
     try {
-      const res = await axios.post(`${API_URL}/login`, credentials);
+      const res = await axios.post(`${API_URL}/login`, credentials, {
+        withCredentials: true,
+      });
       if (res.data?.message === "Success") {
-        const me = await axios.get(`${API_URL}/me`, {withCredentials: true});
+        const me = await axios.get(`${API_URL}/me`, { withCredentials: true });
         if (me.data?.authenticated) {
           setUser(me.data.user);
           return { ok: true };
@@ -89,7 +92,7 @@ export function AuthProvider({ children }) {
     // Se vuoi un logout server-side, crea /logout che pulisce il cookie.
     // Qui gestiamo solo lo stato client-side. Possiamo anche chiamare il backend.
     try {
-      await axios.post(`${API_URL}/logout`, {withCredentials: true});
+      await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
     } catch (e) {
       // ignore se non esiste
     }

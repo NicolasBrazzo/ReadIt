@@ -116,7 +116,7 @@ const getMe = async (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    res.clearCookie("token", { path: "/" });
+    res.clearCookie("token", COOKIE_OPTIONS);
     return res.json({ message: "Logged out successfully" });
   } catch (error) {
     console.error("Logout error:", error);

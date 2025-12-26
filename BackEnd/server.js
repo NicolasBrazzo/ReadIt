@@ -13,28 +13,26 @@ app.use(express.urlencoded({ extended: true }));
 
 // ✅ 2. POI CORS
 const allowedOrigins = [
-  process.env.FRONTEND_URL, // produzione (Vercel)
+  process.env.FRONTEND_URL,
   "http://localhost:5173",
-  "http://localhost:3000",
+  "http://localhost:3000"
 ].filter(Boolean);
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // richieste senza origin (Postman, server-to-server)
-      if (!origin) return callback(null, true);
+app.use(cors({
+  origin: (origin, callback) => {
+    // richieste senza origin (Postman, health check, SSR)
+    if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`CORS blocked: ${origin}`));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // ❌ NON lanciare errori
+    return callback(null, false);
+  },
+  credentials: true
+}));
+
 
 // ✅ 3. POI cookieParser
 app.use(cookieParser());

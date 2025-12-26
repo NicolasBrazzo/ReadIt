@@ -48,9 +48,15 @@ export const Footer = () => {
         <div className="flex-1 flex-center-col gap-2">
           <h3 className="text-2xl font-semibold">Info</h3>
           <ul className="flex-center-col">
-            <li>Privacy policy</li>
-            <li className="mt-3">Support Email: </li>
-            <li>readit.support@gmail.com</li>
+             <li>
+              <Link to={"/privacy-policy"}>Privacy policy</Link>
+            </li>
+             <li>
+              <Link to={"/cookie-policy"}>Cookie policy</Link>
+            </li>
+            <li>
+              <Link to={"/terms"}>Terms & Conditions</Link>
+            </li>
           </ul>
         </div>
       </div>
@@ -60,8 +66,8 @@ export const Footer = () => {
         <h2 className="zen-dots text-3xl">Deisgned by Brazzo Nicolas</h2>
       </div>
 
-      <div className="flex-center-center gap-2"> 
-        <CopyrightIcon/> 
+      <div className="flex-center-center gap-2">
+        <CopyrightIcon />
         <p>2025 ReadIt</p>
       </div>
     </footer>

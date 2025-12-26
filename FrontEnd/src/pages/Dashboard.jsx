@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { Navbar } from "../components/Navbar";
+import { Footer } from "../components/Footer";
 import { useAuth } from "../context/AuthProvider";
 import { useBooks } from "../context/BooksProvider";
 import { AddBookForm } from "../components/AddBookForm";
 import { Check } from "lucide-react";
-import { abbreviateText, capitalizeFirstLetter } from "../utils/utilityFunctions";
+import {
+  abbreviateText,
+  capitalizeFirstLetter,
+} from "../utils/utilityFunctions";
 
 export const Dashboard = () => {
   const [openFormBook, setOpenFormBook] = useState(false);
@@ -82,7 +86,8 @@ export const Dashboard = () => {
       <div className="m-10 flex flex-col gap-10">
         <div className="flex flex-col xl:flex-row items-center justify-between">
           <h1 className="text-2xl w-fit sm:3xl md:text-[50px] zen-dots text-white">
-            <span className="text-primary">Welcome</span> {capitalizeFirstLetter(user?.name)}
+            <span className="text-primary">Welcome</span>{" "}
+            {capitalizeFirstLetter(user?.name)}
           </h1>
           <button onClick={() => logout()}>Logout</button>
 
@@ -158,7 +163,9 @@ export const Dashboard = () => {
                       <h3 className="font-bold">
                         {capitalizeFirstLetter(abbreviateText(book.title))}
                       </h3>
-                      <h4>{capitalizeFirstLetter(abbreviateText(book.author, 30))}</h4>
+                      <h4>
+                        {capitalizeFirstLetter(abbreviateText(book.author, 30))}
+                      </h4>
                     </div>
                     {book.current_page === book.total_pages && (
                       <Check className="bg-green-400 text-black" />
@@ -217,6 +224,8 @@ export const Dashboard = () => {
           )}
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

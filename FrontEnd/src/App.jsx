@@ -5,6 +5,9 @@ import { Dashboard } from "./pages/Dashboard";
 import { SignUp } from "./pages/SignUp";
 import { AuthProvider, PrivateRoute } from "./context/AuthProvider";
 import { BooksProvider } from "./context/BooksProvider";
+import { Terms } from "./pages/Terms";
+import { CookiePolicy } from "./pages/CookiePolicy";
+import { Privacy } from "./pages/Privacy";
 
 function App() {
   return (
@@ -15,6 +18,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
+
+            <Route path="/terms" element={<Terms/>}/>
+            <Route path="/cookie-policy" element={<CookiePolicy/>}/>
+            <Route path="/privacy-policy" element={<Privacy/>}/>
 
             {/* rotta protetta: avvolgiamo il componente nella PrivateRoute */}
             <Route

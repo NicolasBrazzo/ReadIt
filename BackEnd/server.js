@@ -13,23 +13,12 @@ app.use(express.urlencoded({ extended: true }));
 
 // ✅ 2. POI CORS
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  "http://localhost:5173",
-  "http://localhost:3000"
-].filter(Boolean);
+  "https://brz-read-it.vercel.app",
+  "http://localhost:5173"
+];
 
 app.use(cors({
-  origin: (origin, callback) => {
-    // richieste senza origin (Postman, health check, SSR)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    // ❌ NON lanciare errori
-    return callback(null, false);
-  },
+  origin: allowedOrigins,
   credentials: true
 }));
 

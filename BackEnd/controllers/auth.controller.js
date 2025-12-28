@@ -28,6 +28,7 @@ const {
 } = require("../config/jwt");
 
 const register = async (req, res) => {
+  console.log(req)
   try {
     const { name, email, password } = req.body;
 

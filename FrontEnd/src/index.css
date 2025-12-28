@@ -51,6 +51,10 @@ button {
     .flex-center-col {
         @apply flex flex-col justify-center items-center;
     }
+
+    .flex-between-col {
+        @apply flex flex-col justify-between items-center;
+    }
     
     .flex-center-between {
         @apply flex items-center justify-between;

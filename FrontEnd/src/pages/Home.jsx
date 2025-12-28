@@ -3,7 +3,7 @@ import "../slider.css";
 import { Navbar } from "../components/Navbar";
 import { MoveRight } from "lucide-react";
 import { useHomeAnimations } from "../hooks/useAnimations";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useMoveButtonAnimation } from "../hooks/useMoveButtonAnimation";
 import { Slider } from "../components/Slider";
 import { UsageSection } from "../components/UsageSection";
@@ -19,46 +19,12 @@ export const Home = () => {
     buttonRef: movePageButtonRef,
   });
 
-  const [sideSelected, setSideSelected] = useState(0);
-
   return (
     <div className="flex flex-col">
-      {/* <div className="fixed border top-[50%] -translate-y-[50%] h-30 flex flex-col items-center justify-between mx-10 z-50">
-        <button
-          onClick={() => {
-            setSideSelected(0);
-            document
-              .getElementById("hero-section")
-              ?.scrollIntoView({ behavior: "smooth" });
-          }}
-          className={`w-5 h-5 hover:w-6 hover:h-6 transition-all duration-150 ${sideSelected === 0 ? "bg-primary" : "bg-slate-400"} rounded-full`}
-        />
-
-        <button
-          onClick={() => {
-            setSideSelected(1);
-            document
-              .getElementById("usage-section")
-              ?.scrollIntoView({ behavior: "smooth" });
-          }}
-          className={`w-5 h-5 hover:w-6 hover:h-6 transition-all duration-150 ${sideSelected === 1 ? "bg-primary" : "bg-slate-400"} rounded-full`}
-        />
-  
-        <button
-          onClick={() => {
-            setSideSelected(2);
-            document
-              .getElementById("footer")
-              ?.scrollIntoView({ behavior: "smooth" });
-          }}
-          className={`w-5 h-5 hover:w-6 hover:h-6 transition-all duration-150 ${sideSelected === 2 ? "bg-primary" : "bg-slate-400"} rounded-full`}
-        />
-      </div> */}
-
       <Navbar />
 
       <div
-        className="flex-1 relative flex flex-col items-center gap-7 justify-center mb-8 min-h-[80vh]"
+        className="flex-1 relative flex-center-col gap-7 mb-8 min-h-[80vh]"
         id="hero-section"
       >
         <div className="relative">

@@ -146,7 +146,7 @@ export const Dashboard = () => {
             : ""}
         </h2>
 
-        <div className="flex flex-col sm:flex-row flex-wrap sm:gap-[5%] lg:gap-[3%]">
+        <div className="flex flex-col flex-wrap sm:flex-row sm:gap-[5%] lg:gap-[3%]">
           {books.length === 0 ? (
             <p className="text-white text-center w-full">
               No books founded, add one
@@ -189,7 +189,7 @@ export const Dashboard = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex flex-col justify-between items-center zen-dots text-xl w-full">
+                    <div className="flex-between-col zen-dots text-xl w-full">
                       <button
                         className="bg-white text-black w-full py-2"
                         onClick={() => {

@@ -12,14 +12,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ✅ 2. POI CORS
-const allowedOrigins = [
-  "https://brz-read-it.vercel.app",
-  "http://localhost:5173"
-];
-
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
+  origin: [
+    process.env.FRONTEND_URL,
+    "http://localhost:5173",
+    "http://localhost:3000"
+  ].filter(Boolean),
 }));
 
 

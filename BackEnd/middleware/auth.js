@@ -8,23 +8,28 @@
 
 // Quando viene usato: Prima che il controller venga eseguito
 
-const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../config/jwt');
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../config/jwt");
 
-const authMiddleware = (req, res, next) => {
+module.exports = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ error: "Missing token" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ error: "Invalid token format" });
+  }
+
   try {
-    const token = req.cookies?.token;
-    
-    if (!token) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
-
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
     next();
-  } catch (error) {
-    return res.status(401).json({ error: 'Invalid token' });
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid or expired token" });
   }
 };
 
-module.exports = authMiddleware;

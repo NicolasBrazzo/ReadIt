@@ -9,13 +9,19 @@
 
 // Quando viene usato: Quando arriva una richiesta HTTP
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { register, login, getMe, logout } = require('../controllers/auth.controller');
+const auth = require("../middleware/auth");
+const {
+  register,
+  login,
+  getMe,
+  logout,
+} = require("../controllers/auth.controller");
 
-router.post('/register', register);
-router.post('/login', login);
-router.get('/me', getMe);
-router.post('/logout', logout);
+router.post("/register", register);
+router.post("/login", login);
+router.get("/me", auth, getMe);
+router.post("/logout", auth, logout);
 
 module.exports = router;

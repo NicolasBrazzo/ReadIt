@@ -28,7 +28,7 @@ const {
 } = require("../config/jwt");
 
 const register = async (req, res) => {
-  console.log(req)
+  console.log(req);
   try {
     const { name, email, password } = req.body;
 
@@ -54,10 +54,10 @@ const register = async (req, res) => {
       expiresIn: JWT_EXPIRES_IN,
     });
 
-    // Imposta cookie
-    res.cookie("token", token, COOKIE_OPTIONS);
-
-    return res.json({ message: "Success", userId: result.insertId });
+    return res.json({
+      message: "Success",
+      token,
+    });
   } catch (error) {
     console.error("Register error:", error);
     return res.status(500).json({ error: "Registration failed" });
@@ -74,7 +74,7 @@ const login = async (req, res) => {
     }
 
     // Trova utente
-    const user = await findUserByEmail(email);  
+    const user = await findUserByEmail(email);
     if (!user) {
       return res.status(400).json({ error: "Invalid credentials" });
     }
@@ -90,10 +90,10 @@ const login = async (req, res) => {
       expiresIn: JWT_EXPIRES_IN,
     });
 
-    // Imposta cookie
-    res.cookie("token", token, COOKIE_OPTIONS);
-
-    return res.json({ message: "Success" });
+    return res.json({
+      message: "Success",
+      token,
+    });
   } catch (error) {
     console.error("Login error:", error);
     return res.status(500).json({ error: "Login failed" });
@@ -102,7 +102,13 @@ const login = async (req, res) => {
 
 const getMe = async (req, res) => {
   try {
-    const token = req.cookies?.token;
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return res.status(401).json({ authenticated: false });
+    }
+
+    const token = authHeader.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({ authenticated: false });

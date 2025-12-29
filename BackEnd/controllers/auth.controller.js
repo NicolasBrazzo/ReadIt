@@ -28,7 +28,6 @@ const {
 } = require("../config/jwt");
 
 const register = async (req, res) => {
-  console.log(req);
   try {
     const { name, email, password } = req.body;
 
@@ -101,25 +100,22 @@ const login = async (req, res) => {
 };
 
 const getMe = async (req, res) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.json({ authenticated: false });
+  }
+
+  const token = authHeader.split(" ")[1];
+
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-      return res.status(401).json({ authenticated: false });
-    }
-
-    const token = authHeader.split(" ")[1];
-
-    if (!token) {
-      return res.status(401).json({ authenticated: false });
-    }
-
     const decoded = jwt.verify(token, JWT_SECRET);
     return res.json({ authenticated: true, user: decoded });
-  } catch (error) {
-    return res.status(401).json({ authenticated: false });
+  } catch {
+    return res.json({ authenticated: false });
   }
 };
+
 
 const logout = async (req, res) => {
   try {

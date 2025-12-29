@@ -15,7 +15,7 @@ export const Dashboard = () => {
   const [booksVisualization, setBooksVisualization] = useState("Progress");
   const [bookToEdit, setBookToEdit] = useState(null);
 
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const {
     books,
     loading,
@@ -29,26 +29,60 @@ export const Dashboard = () => {
 
   // Carica i libri quando il componente viene montato
   useEffect(() => {
-    fetchNotFinishedBooks();
-  }, []);
+    if (!authLoading && user) {
+      fetchNotFinishedBooks();
+    }
+  }, [authLoading, user]);
 
   // Switch per settare la visualizzazione dei libri
-  useEffect(() => {
-    switch (booksVisualization) {
-      case "Progress":
-        fetchNotFinishedBooks();
-        break;
-      case "All":
-        fetchBooks();
-        break;
-      case "Finished":
-        fetchFinishedBooks();
-        break;
-      default:
-        fetchNotFinishedBooks();
-        break;
-    }
-  }, [booksVisualization]);
+  // useEffect(() => {
+  //   if (!authLoading && user) {
+  //     // ✅ Solo se autenticato
+  //     switch (booksVisualization) {
+  //       case "Progress":
+  //         fetchNotFinishedBooks();
+  //         break;
+  //       case "All":
+  //         fetchBooks();
+  //         break;
+  //       case "Finished":
+  //         fetchFinishedBooks();
+  //         break;
+  //       default:
+  //         fetchNotFinishedBooks();
+  //         break;
+  //     }
+  //   }
+  // }, [booksVisualization, authLoading, user]);
+
+    const handleViewAllBooks = () => {
+    setBooksVisualization("All");
+    fetchBooks();
+  };
+
+  const handleViewInProgressBooks = () => {
+    setBooksVisualization("Progress");
+    fetchNotFinishedBooks();
+  };
+
+  const handleViewFinishedBooks = () => {
+    setBooksVisualization("Finished");
+    fetchFinishedBooks();
+  };
+
+  // ✅ Mostra loading durante il check auth
+  if (authLoading) {
+    return <div>Loading authentication...</div>;
+  }
+
+  // ✅ Se non autenticato, il PrivateRoute ti reindirizzerà
+  if (!user) {
+    return null;
+  }
+
+  if (loading) {
+    return <div>Caricamento libri...</div>;
+  }
 
   const handleUpdateProgress = async (bookId, newPage) => {
     const result = await updateProgress(bookId, newPage);
@@ -106,13 +140,15 @@ export const Dashboard = () => {
               {openFormBook ? "Cancel" : "Add book"}
             </button>
 
+            {/* ✅ USA LE NUOVE FUNZIONI */}
             <button
               className="underline text-primary"
               onClick={() => {
                 if (booksVisualization === "All") {
-                  return setBooksVisualization("Progress");
+                  handleViewInProgressBooks();
+                } else {
+                  handleViewAllBooks();
                 }
-                setBooksVisualization("All");
               }}
             >
               {booksVisualization === "All"
@@ -122,7 +158,7 @@ export const Dashboard = () => {
 
             <button
               className="underline text-primary"
-              onClick={() => setBooksVisualization("Finished")}
+              onClick={handleViewFinishedBooks}
             >
               View Finished Books
             </button>

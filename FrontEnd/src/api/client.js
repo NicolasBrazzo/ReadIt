@@ -7,6 +7,7 @@ const api = axios.create({
   },
 });
 
+// Interceptor per aggiungere il token a ogni richiesta
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -20,13 +21,12 @@ api.interceptors.request.use(
   }
 );
 
+// ✅ RIMOSSO IL REDIRECT AUTOMATICO
+// L'AuthProvider gestirà gli errori 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-    }
+    // Non fare nulla qui, lascia che ogni componente gestisca i suoi errori
     return Promise.reject(error);
   }
 );

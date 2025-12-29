@@ -31,14 +31,31 @@ const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
+    console.log('📥 Register request:', { name, email, password: '***' }); // ✅ DEBUG
+
     // Validazione input
     if (!name || !email || !password) {
+      console.log('❌ Missing fields'); // ✅ DEBUG
       return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Validazione email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      console.log('❌ Invalid email format'); // ✅ DEBUG
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Validazione password (minimo 6 caratteri)
+    if (password.length < 6) {
+      console.log('❌ Password too short'); // ✅ DEBUG
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
     }
 
     // Controlla se email esiste già
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
+      console.log('❌ Email already exists'); // ✅ DEBUG
       return res.status(400).json({ error: "Email already registered" });
     }
 
@@ -47,18 +64,21 @@ const register = async (req, res) => {
 
     // Crea utente
     const result = await createUser(name, email, hashedPassword);
+    console.log('✅ User created:', result); // ✅ DEBUG
 
     // Genera JWT
-    const token = jwt.sign({ name, id: result.insertId }, JWT_SECRET, {
+    const token = jwt.sign({ name, id: result.id }, JWT_SECRET, {
       expiresIn: JWT_EXPIRES_IN,
     });
+
+    console.log('✅ Token generated'); // ✅ DEBUG
 
     return res.json({
       message: "Success",
       token,
     });
   } catch (error) {
-    console.error("Register error:", error);
+    console.error("❌ Register error:", error);
     return res.status(500).json({ error: "Registration failed" });
   }
 };
@@ -83,7 +103,7 @@ const login = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid credentials" });
     }
-
+    
     // Genera JWT
     const token = jwt.sign({ name: user.name, id: user.id }, JWT_SECRET, {
       expiresIn: JWT_EXPIRES_IN,

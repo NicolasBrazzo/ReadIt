@@ -8,21 +8,25 @@ export function BooksProvider({ children }) {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentView, setCurrentView] = useState("in_progress");
-  const { user } = useAuth();
+  const { user, loading: authLoading  } = useAuth();
 
   // GET /books - Carica tutti i libri
   const fetchBooks = async () => {
-    if (!user) return;
+    if (!user || authLoading) return;
 
     setLoading(true);
     try {
-      const res = await api.get("/books"); // ✅ RIMOSSO withCredentials
+      const res = await api.get("/books");
       console.log("res", res);
       setBooks(res.data.books);
       setCurrentView("all");
       return { ok: true };
     } catch (err) {
       console.error("Fetch books error:", err);
+      // ✅ Se errore 401, l'utente non è autenticato
+      if (err.response?.status === 401) {
+        return { ok: false, message: "Not authenticated" };
+      }
       return { ok: false, message: err.response?.data?.error || err.message };
     } finally {
       setLoading(false);
@@ -30,17 +34,20 @@ export function BooksProvider({ children }) {
   };
 
   // GET /books/finished - Carica tutti i libri Finiti
-  const fetchFinishedBooks = async () => {
-    if (!user) return;
+   const fetchFinishedBooks = async () => {
+    if (!user || authLoading) return;
 
     setLoading(true);
     try {
-      const res = await api.get("/books/finished"); // ✅ RIMOSSO withCredentials
+      const res = await api.get("/books/finished");
       setBooks(res.data.books);
       setCurrentView("finished");
       return { ok: true };
     } catch (err) {
       console.error("Fetch books error:", err);
+      if (err.response?.status === 401) {
+        return { ok: false, message: "Not authenticated" };
+      }
       return { ok: false, message: err.response?.data?.error || err.message };
     } finally {
       setLoading(false);
@@ -48,17 +55,20 @@ export function BooksProvider({ children }) {
   };
 
   // GET /books/in_progress - Carica tutti i libri in progress
-  const fetchNotFinishedBooks = async () => {
-    if (!user) return;
+ const fetchNotFinishedBooks = async () => {
+    if (!user || authLoading) return; // ✅ Non chiamare se auth sta ancora caricando
 
     setLoading(true);
     try {
-      const res = await api.get("/books/in_progress"); // ✅ RIMOSSO withCredentials
+      const res = await api.get("/books/in_progress");
       setBooks(res.data.books);
       setCurrentView("in_progress");
       return { ok: true };
     } catch (err) {
       console.error("Fetch books error:", err);
+      if (err.response?.status === 401) {
+        return { ok: false, message: "Not authenticated" };
+      }
       return { ok: false, message: err.response?.data?.error || err.message };
     } finally {
       setLoading(false);
@@ -152,7 +162,7 @@ export function BooksProvider({ children }) {
   };
 
   return (
-    <BooksContext.Provider
+     <BooksContext.Provider
       value={{
         books,
         loading,

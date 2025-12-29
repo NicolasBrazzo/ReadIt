@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { Navigate } from "react-router-dom";
+import api from "../api/client";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -21,6 +22,8 @@ export function AuthProvider({ children }) {
 
   const checkAuth = async () => {
     const token = localStorage.getItem("token");
+
+    console.log("🔍 Checking auth, token:", token ? "exists" : "missing"); // ✅ DEBUG
 
     if (!token) {
       setUser(null);
@@ -46,21 +49,21 @@ export function AuthProvider({ children }) {
   };
 
   // SIGNUP
- const register = async (credentials) => {
+  const register = async (credentials) => {
     try {
       console.log("📤 Sending credentials:", credentials);
       const res = await api.post("/register", credentials);
       console.log("📥 Response:", res.data);
-      
+
       if (res.data?.message === "Success" && res.data?.token) {
-        // Salva il token
-        localStorage.setItem('token', res.data.token);
-        
-        // Ricontrolla l'auth per popolare user
+        console.log("✅ Token received, saving..."); // ✅ DEBUG
+        localStorage.setItem("token", res.data.token);
+        console.log("✅ Token saved:", localStorage.getItem("token")); // ✅ DEBUG
+
         await checkAuth();
         return { ok: true };
       }
-      
+
       return { ok: false, message: res.data?.error || "Registration failed" };
     } catch (err) {
       console.error("Register error:", err);
@@ -72,16 +75,16 @@ export function AuthProvider({ children }) {
   const login = async (credentials) => {
     try {
       const res = await api.post("/login", credentials);
-      
+
       if (res.data?.message === "Success" && res.data?.token) {
         // Salva il token
-        localStorage.setItem('token', res.data.token);
-        
+        localStorage.setItem("token", res.data.token);
+
         // Ricontrolla l'auth per popolare user
         await checkAuth();
         return { ok: true };
       }
-      
+
       return { ok: false, message: res.data?.error || "Login failed" };
     } catch (err) {
       console.error("Login error:", err);
@@ -95,13 +98,13 @@ export function AuthProvider({ children }) {
     } catch (e) {
       // Ignora errori dal backend
     }
-    
-    localStorage.removeItem('token');
+
+    localStorage.removeItem("token");
     setUser(null);
   };
 
   return (
-   <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -114,9 +117,9 @@ export function useAuth() {
 // PrivateRoute component (da usare come wrapper attorno alle rotte protette)
 export function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
-  
+
   if (loading) return <div>Loading...</div>;
   if (!user) return <Navigate to="/login" replace />;
-  
+
   return children;
 }

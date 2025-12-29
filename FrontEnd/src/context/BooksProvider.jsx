@@ -1,10 +1,8 @@
 import { createContext, useContext, useState } from "react";
-import axios from "axios";
+import api from "../api/client"; // ✅ USA L'ISTANZA API
 import { useAuth } from "./AuthProvider";
 
 const BooksContext = createContext(null);
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 export function BooksProvider({ children }) {
   const [books, setBooks] = useState([]);
@@ -18,7 +16,7 @@ export function BooksProvider({ children }) {
 
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/books`, { withCredentials: true });
+      const res = await api.get("/books"); // ✅ RIMOSSO withCredentials
       console.log("res", res);
       setBooks(res.data.books);
       setCurrentView("all");
@@ -37,7 +35,7 @@ export function BooksProvider({ children }) {
 
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/books/finished`, { withCredentials: true });
+      const res = await api.get("/books/finished"); // ✅ RIMOSSO withCredentials
       setBooks(res.data.books);
       setCurrentView("finished");
       return { ok: true };
@@ -55,7 +53,7 @@ export function BooksProvider({ children }) {
 
     setLoading(true);
     try {
-      const res = await axios.get(`${API_URL}/books/in_progress`, { withCredentials: true });
+      const res = await api.get("/books/in_progress"); // ✅ RIMOSSO withCredentials
       setBooks(res.data.books);
       setCurrentView("in_progress");
       return { ok: true };
@@ -87,7 +85,7 @@ export function BooksProvider({ children }) {
   // POST /books - Crea nuovo libro
   const createBook = async (bookData) => {
     try {
-      const res = await axios.post(`${API_URL}/books`, bookData, { withCredentials: true });
+      const res = await api.post("/books", bookData); // ✅ RIMOSSO withCredentials
 
       // Ricarica la vista corrente dopo aver creato
       await refreshCurrentView();
@@ -102,7 +100,7 @@ export function BooksProvider({ children }) {
   // PUT /books/:id - Aggiorna libro completo
   const updateBook = async (bookId, bookData) => {
     try {
-      await axios.put(`${API_URL}/books/${bookId}`, bookData, { withCredentials: true });
+      await api.put(`/books/${bookId}`, bookData); // ✅ RIMOSSO withCredentials
 
       // Ricarica la vista corrente per ottenere i dati aggiornati dal server
       await refreshCurrentView();
@@ -117,11 +115,10 @@ export function BooksProvider({ children }) {
   // PATCH /books/:id/progress - Aggiorna solo progresso
   const updateProgress = async (bookId, currentPage) => {
     try {
-      await axios.patch(
-        `${API_URL}/books/${bookId}/progress`,
-        { currentPage },
-        { withCredentials: true }
-      );
+      await api.patch(
+        `/books/${bookId}/progress`,
+        { currentPage }
+      ); // ✅ RIMOSSO withCredentials
 
       // Ricarica la vista corrente per mantenere sincronizzato
       await refreshCurrentView();
@@ -136,7 +133,7 @@ export function BooksProvider({ children }) {
   // DELETE /books/:id - Elimina libro
   const deleteBook = async (bookId) => {
     try {
-      await axios.delete(`${API_URL}/books/${bookId}`, { withCredentials: true });
+      await api.delete(`/books/${bookId}`); // ✅ RIMOSSO withCredentials
 
       // Rimuovi dallo stato locale
       setBooks(books.filter((book) => book.id !== bookId));

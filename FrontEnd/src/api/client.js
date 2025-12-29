@@ -7,7 +7,6 @@ const api = axios.create({
   },
 });
 
-// Interceptor per aggiungere il token a ogni richiesta
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -21,7 +20,6 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor per gestire token scaduto
 api.interceptors.response.use(
   (response) => response,
   (error) => {

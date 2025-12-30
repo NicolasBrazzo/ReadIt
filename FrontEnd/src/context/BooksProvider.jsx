@@ -17,7 +17,6 @@ export function BooksProvider({ children }) {
     setLoading(true);
     try {
       const res = await api.get("/books");
-      console.log("res", res);
       setBooks(res.data.books);
       setCurrentView("all");
       return { ok: true };

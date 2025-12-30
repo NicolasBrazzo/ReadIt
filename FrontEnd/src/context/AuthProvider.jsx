@@ -23,8 +23,6 @@ export function AuthProvider({ children }) {
   const checkAuth = async () => {
     const token = localStorage.getItem("token");
 
-    console.log("🔍 Checking auth, token:", token ? "exists" : "missing"); // ✅ DEBUG
-
     if (!token) {
       setUser(null);
       setLoading(false);
@@ -50,26 +48,27 @@ export function AuthProvider({ children }) {
 
   // SIGNUP
   const register = async (credentials) => {
-    try {
-      console.log("📤 Sending credentials:", credentials);
-      const res = await api.post("/register", credentials);
-      console.log("📥 Response:", res.data);
-
-      if (res.data?.message === "Success" && res.data?.token) {
-        console.log("✅ Token received, saving..."); // ✅ DEBUG
-        localStorage.setItem("token", res.data.token);
-        console.log("✅ Token saved:", localStorage.getItem("token")); // ✅ DEBUG
-
-        await checkAuth();
-        return { ok: true };
-      }
-
-      return { ok: false, message: res.data?.error || "Registration failed" };
-    } catch (err) {
-      console.error("Register error:", err);
-      return { ok: false, message: err.response?.data?.error || err.message };
+  try {
+    const res = await api.post("/register", credentials);
+    if (res.data?.message === "Success" && res.data?.token) {
+      localStorage.setItem("token", res.data.token);
+      await checkAuth();
+      return { ok: true };
     }
-  };
+    return { 
+      ok: false, 
+      message: res.data?.error || "Registration failed",
+      details: res.data?.details || [] // ✅ Passa i dettagli degli errori
+    };
+  } catch (err) {
+    console.error("Register error:", err);
+    return { 
+      ok: false, 
+      message: err.response?.data?.error || err.message,
+      details: err.response?.data?.details || [] // ✅ Passa i dettagli degli errori
+    };
+  }
+};
 
   // LOGIN
   const login = async (credentials) => {

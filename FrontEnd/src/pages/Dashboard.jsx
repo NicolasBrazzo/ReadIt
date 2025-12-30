@@ -34,28 +34,7 @@ export const Dashboard = () => {
     }
   }, [authLoading, user]);
 
-  // Switch per settare la visualizzazione dei libri
-  // useEffect(() => {
-  //   if (!authLoading && user) {
-  //     // ✅ Solo se autenticato
-  //     switch (booksVisualization) {
-  //       case "Progress":
-  //         fetchNotFinishedBooks();
-  //         break;
-  //       case "All":
-  //         fetchBooks();
-  //         break;
-  //       case "Finished":
-  //         fetchFinishedBooks();
-  //         break;
-  //       default:
-  //         fetchNotFinishedBooks();
-  //         break;
-  //     }
-  //   }
-  // }, [booksVisualization, authLoading, user]);
-
-    const handleViewAllBooks = () => {
+  const handleViewAllBooks = () => {
     setBooksVisualization("All");
     fetchBooks();
   };
@@ -184,7 +163,7 @@ export const Dashboard = () => {
 
         <div className="flex flex-col flex-wrap sm:flex-row sm:gap-[5%] lg:gap-[3%]">
           {books.length === 0 ? (
-            <p className="text-white text-center w-full">
+            <p className="text-white text-center w-full py-30">
               No books founded, add one
             </p>
           ) : (

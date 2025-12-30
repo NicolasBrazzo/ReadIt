@@ -1,13 +1,12 @@
 // Abbrevia una stringa 
 export const abbreviateText = (text, maxLength = 25) => {
     if (typeof text !== "string") {
-        console.log("Add a strung")
+      return
     }
     if(text.length <= maxLength) {
         return text;
     }
     return text.slice(0, maxLength) + "..."
-    // console.log(text)
 }
 
 // Rendi maiuscola la prima lettera di una stringa

@@ -8,9 +8,11 @@ import { BooksProvider } from "./context/BooksProvider";
 import { Terms } from "./pages/Terms";
 import { CookiePolicy } from "./pages/CookiePolicy";
 import { Privacy } from "./pages/Privacy";
+import { Analytics } from "@vercel/analytics/react"
 
 function App() {
   return (
+    <>
     <AuthProvider>
       <BooksProvider>
         <BrowserRouter>
@@ -39,6 +41,8 @@ function App() {
         </BrowserRouter>
       </BooksProvider>
     </AuthProvider>
+    <Analytics/>
+    </>
   );
 }
 

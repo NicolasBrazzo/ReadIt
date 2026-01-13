@@ -164,7 +164,7 @@ export const Dashboard = () => {
         <div className="flex flex-col flex-wrap sm:flex-row sm:gap-[5%] lg:gap-[3%]">
           {books.length === 0 ? (
             <p className="text-white text-center w-full py-30">
-              No books founded, add one
+              No books found, add one
             </p>
           ) : (
             books.map((book) => (

@@ -4,11 +4,12 @@ import { Footer } from "../components/Footer";
 import { useAuth } from "../context/AuthProvider";
 import { useBooks } from "../context/BooksProvider";
 import { AddBookForm } from "../components/AddBookForm";
-import { Check } from "lucide-react";
+import { Check, Heart, X } from "lucide-react";
 import {
   abbreviateText,
   capitalizeFirstLetter,
 } from "../utils/utilityFunctions";
+import { BOOK_GENRES } from "../../constants";
 
 export const Dashboard = () => {
   const [openFormBook, setOpenFormBook] = useState(false);
@@ -17,7 +18,7 @@ export const Dashboard = () => {
 
   const { user, logout, loading: authLoading } = useAuth();
   const {
-    books,
+    filteredBooks,
     loading,
     fetchBooks,
     fetchFinishedBooks,
@@ -25,9 +26,16 @@ export const Dashboard = () => {
     updateProgress,
     deleteBook,
     getProgress,
+    toggleBookFavorite,
+    filterGenre,
+    setFilterGenre,
+    filterAuthor,
+    setFilterAuthor,
+    showOnlyFavorites,
+    setShowOnlyFavorites,
+    resetFilters,
   } = useBooks();
 
-  // Carica i libri quando il componente viene montato
   useEffect(() => {
     if (!authLoading && user) {
       fetchNotFinishedBooks();
@@ -49,12 +57,10 @@ export const Dashboard = () => {
     fetchFinishedBooks();
   };
 
-  // ✅ Mostra loading durante il check auth
   if (authLoading) {
     return <div>Loading authentication...</div>;
   }
 
-  // ✅ Se non autenticato, il PrivateRoute ti reindirizzerà
   if (!user) {
     return null;
   }
@@ -89,9 +95,11 @@ export const Dashboard = () => {
     setBookToEdit(null);
   };
 
-  if (loading) {
-    return <div>Caricamento libri...</div>;
-  }
+  const handleToggleFavorite = async (book) => {
+    await toggleBookFavorite(book.id, !book.is_favorite);
+  };
+
+  const hasActiveFilters = filterGenre || filterAuthor || showOnlyFavorites;
 
   return (
     <div>
@@ -119,7 +127,6 @@ export const Dashboard = () => {
               {openFormBook ? "Cancel" : "Add book"}
             </button>
 
-            {/* ✅ USA LE NUOVE FUNZIONI */}
             <button
               className="underline text-primary"
               onClick={() => {
@@ -151,6 +158,52 @@ export const Dashboard = () => {
           />
         )}
 
+        {/* Barra filtri */}
+        <div className="flex flex-wrap gap-3 items-center p-4 border border-white/20 rounded bg-white/5">
+          <select
+            value={filterGenre}
+            onChange={(e) => setFilterGenre(e.target.value)}
+            className="px-3 py-2 rounded border border-white/30 bg-transparent text-white text-sm"
+          >
+            <option value="" className="bg-black">All genres</option>
+            {BOOK_GENRES.map((g) => (
+              <option key={g} value={g} className="bg-black">
+                {g}
+              </option>
+            ))}
+          </select>
+
+          <input
+            type="text"
+            placeholder="Filter by author..."
+            value={filterAuthor}
+            onChange={(e) => setFilterAuthor(e.target.value)}
+            className="px-3 py-2 rounded border border-white/30 bg-transparent text-white text-sm placeholder-white/40"
+          />
+
+          <button
+            onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+            className={`flex items-center gap-2 px-3 py-2 rounded border text-sm transition-colors ${
+              showOnlyFavorites
+                ? "border-primary bg-primary/20 text-primary"
+                : "border-white/30 text-white/70 hover:border-white"
+            }`}
+          >
+            <Heart size={14} fill={showOnlyFavorites ? "currentColor" : "none"} />
+            Favorites
+          </button>
+
+          {hasActiveFilters && (
+            <button
+              onClick={resetFilters}
+              className="flex items-center gap-1 px-3 py-2 rounded border border-white/30 text-white/60 text-sm hover:text-white"
+            >
+              <X size={12} />
+              Reset
+            </button>
+          )}
+        </div>
+
         <h2 className="comfoorta text-2xl font-bold">
           {booksVisualization === "All"
             ? "All books:"
@@ -162,12 +215,12 @@ export const Dashboard = () => {
         </h2>
 
         <div className="flex flex-col flex-wrap sm:flex-row sm:gap-[5%] lg:gap-[3%]">
-          {books.length === 0 ? (
+          {filteredBooks.length === 0 ? (
             <p className="text-white text-center w-full py-30">
               No books found, add one
             </p>
           ) : (
-            books.map((book) => (
+            filteredBooks.map((book) => (
               <div
                 key={book.id}
                 className="border-3 w-full sm:w-[45%] lg:w-[30%] mb-[3%] border-white p-1"
@@ -181,10 +234,27 @@ export const Dashboard = () => {
                       <h4>
                         {capitalizeFirstLetter(abbreviateText(book.author, 30))}
                       </h4>
+                      {book.genre && (
+                        <span className="text-xs font-normal text-primary border border-primary px-2 py-0.5 rounded mt-1 inline-block">
+                          {book.genre}
+                        </span>
+                      )}
                     </div>
-                    {book.current_page === book.total_pages && (
-                      <Check className="bg-green-400 text-black" />
-                    )}
+                    <div className="flex flex-col items-end gap-2">
+                      {book.current_page === book.total_pages && (
+                        <Check className="bg-green-400 text-black" />
+                      )}
+                      <button
+                        onClick={() => handleToggleFavorite(book)}
+                        className="text-primary hover:scale-110 transition-transform"
+                        title={book.is_favorite ? "Remove from favorites" : "Add to favorites"}
+                      >
+                        <Heart
+                          size={20}
+                          fill={book.is_favorite ? "currentColor" : "none"}
+                        />
+                      </button>
+                    </div>
                   </div>
 
                   <hr className="my-5" />

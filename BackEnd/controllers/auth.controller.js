@@ -15,7 +15,7 @@
 // → Controller risponde al frontend
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { createUser, findUserByEmail } = require("../models/user.model");
+const { createUser, findUserByEmail, findUserById, updateUser, updatePassword } = require("../models/user.model");
 const {
   JWT_SECRET,
   JWT_EXPIRES_IN,
@@ -130,7 +130,12 @@ const getMe = async (req, res) => {
   const token = authHeader.split(" ")[1];
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    return res.json({ authenticated: true, user: decoded });
+    const user = await findUserById(decoded.id);
+    if (!user) return res.json({ authenticated: false });
+    return res.json({
+      authenticated: true,
+      user: { id: user.id, name: user.name, email: user.email, avatar_url: user.avatar_url || null },
+    });
   } catch {
     return res.json({ authenticated: false });
   }
@@ -146,9 +151,78 @@ const logout = async (req, res) => {
   }
 };
 
+// PUT /profile - Aggiorna nome e/o avatar
+const updateProfile = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    const { name, avatar_url } = req.body;
+
+    if (!name && avatar_url === undefined) {
+      return res.status(400).json({ error: "No fields to update" });
+    }
+
+    const fields = {};
+    if (name) fields.name = name.trim();
+    if (avatar_url !== undefined) fields.avatar_url = avatar_url || null;
+
+    const updatedUser = await updateUser(req.user.id, fields);
+
+    return res.json({ message: "Profile updated", user: updatedUser });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    return res.status(500).json({ error: "Failed to update profile" });
+  }
+};
+
+// PATCH /profile/password - Cambia password
+const changePassword = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const user = await findUserById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Current password is incorrect" });
+    }
+
+    const passwordErrors = validatePassword(newPassword);
+    if (passwordErrors.length > 0) {
+      return res.status(400).json({
+        error: "Password requirements not met",
+        details: passwordErrors,
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await updatePassword(req.user.id, hashedPassword);
+
+    return res.json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Change password error:", error);
+    return res.status(500).json({ error: "Failed to change password" });
+  }
+};
+
 module.exports = {
   register,
   login,
   getMe,
   logout,
+  updateProfile,
+  changePassword,
 };

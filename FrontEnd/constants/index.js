@@ -1,3 +1,22 @@
+export const BOOK_GENRES = [
+  "Narrativa",
+  "Fantasy",
+  "Fantascienza",
+  "Thriller",
+  "Giallo",
+  "Horror",
+  "Romanzo storico",
+  "Biografia",
+  "Saggistica",
+  "Filosofia",
+  "Psicologia",
+  "Self-help",
+  "Informatica",
+  "Arte e design",
+  "Poesia",
+  "Altro",
+];
+
 export const loginInputs = [
   {
     name: "email",

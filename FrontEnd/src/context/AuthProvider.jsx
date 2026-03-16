@@ -1,10 +1,7 @@
 // src/context/AuthProvider.jsx
 import { createContext, useContext, useEffect, useState } from "react";
-import axios from "axios";
 import { Navigate } from "react-router-dom";
 import api from "../api/client";
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 // Cosa fa: crea il context React che conterrà user, loading, login (e logout se aggiunto).
 // Quando è usato: al momento del rendering, permette ai componenti figli di accedere ai dati di autenticazione tramite useContext.

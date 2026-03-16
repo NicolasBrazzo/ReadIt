@@ -102,8 +102,35 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // Aggiorna profilo (nome, avatar_url)
+  const updateUserProfile = async (data) => {
+    try {
+      const res = await api.put("/profile", data);
+      if (res.data?.user) {
+        setUser((prev) => ({ ...prev, ...res.data.user }));
+      }
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, message: err.response?.data?.error || err.message };
+    }
+  };
+
+  // Cambia password
+  const changePassword = async (data) => {
+    try {
+      await api.patch("/profile/password", data);
+      return { ok: true };
+    } catch (err) {
+      return {
+        ok: false,
+        message: err.response?.data?.error || err.message,
+        details: err.response?.data?.details || [],
+      };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUserProfile, changePassword }}>
       {children}
     </AuthContext.Provider>
   );

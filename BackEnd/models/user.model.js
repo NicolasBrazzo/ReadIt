@@ -57,8 +57,38 @@ const findUserById = async (id) => {
   return data;
 };
 
+/**
+ * AGGIORNA PROFILO UTENTE
+ */
+const updateUser = async (id, fields) => {
+  const { data, error } = await supabase
+    .from('users')
+    .update(fields)
+    .eq('id', id)
+    .select('id, name, email, avatar_url')
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+/**
+ * AGGIORNA PASSWORD
+ */
+const updatePassword = async (id, hashedPassword) => {
+  const { error } = await supabase
+    .from('users')
+    .update({ password: hashedPassword })
+    .eq('id', id);
+
+  if (error) throw error;
+  return true;
+};
+
 module.exports = {
   createUser,
   findUserByEmail,
   findUserById,
+  updateUser,
+  updatePassword,
 };

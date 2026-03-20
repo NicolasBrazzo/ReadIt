@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import api from "../api/client"; // ✅ USA L'ISTANZA API
+import api from "../api/client";
 import { useAuth } from "./AuthProvider";
 
 const BooksContext = createContext(null);
@@ -8,7 +8,12 @@ export function BooksProvider({ children }) {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentView, setCurrentView] = useState("in_progress");
-  const { user, loading: authLoading  } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+
+  // Filtri
+  const [filterGenre, setFilterGenre] = useState("");
+  const [filterAuthor, setFilterAuthor] = useState("");
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 
   // GET /books - Carica tutti i libri
   const fetchBooks = async () => {
@@ -22,7 +27,6 @@ export function BooksProvider({ children }) {
       return { ok: true };
     } catch (err) {
       console.error("Fetch books error:", err);
-      // ✅ Se errore 401, l'utente non è autenticato
       if (err.response?.status === 401) {
         return { ok: false, message: "Not authenticated" };
       }
@@ -33,7 +37,7 @@ export function BooksProvider({ children }) {
   };
 
   // GET /books/finished - Carica tutti i libri Finiti
-   const fetchFinishedBooks = async () => {
+  const fetchFinishedBooks = async () => {
     if (!user || authLoading) return;
 
     setLoading(true);
@@ -54,8 +58,8 @@ export function BooksProvider({ children }) {
   };
 
   // GET /books/in_progress - Carica tutti i libri in progress
- const fetchNotFinishedBooks = async () => {
-    if (!user || authLoading) return; // ✅ Non chiamare se auth sta ancora caricando
+  const fetchNotFinishedBooks = async () => {
+    if (!user || authLoading) return;
 
     setLoading(true);
     try {
@@ -94,11 +98,8 @@ export function BooksProvider({ children }) {
   // POST /books - Crea nuovo libro
   const createBook = async (bookData) => {
     try {
-      const res = await api.post("/books", bookData); // ✅ RIMOSSO withCredentials
-
-      // Ricarica la vista corrente dopo aver creato
+      const res = await api.post("/books", bookData);
       await refreshCurrentView();
-
       return { ok: true, book: res.data.book };
     } catch (err) {
       console.error("Create book error:", err);
@@ -109,11 +110,8 @@ export function BooksProvider({ children }) {
   // PUT /books/:id - Aggiorna libro completo
   const updateBook = async (bookId, bookData) => {
     try {
-      await api.put(`/books/${bookId}`, bookData); // ✅ RIMOSSO withCredentials
-
-      // Ricarica la vista corrente per ottenere i dati aggiornati dal server
+      await api.put(`/books/${bookId}`, bookData);
       await refreshCurrentView();
-
       return { ok: true };
     } catch (err) {
       console.error("Update book error:", err);
@@ -124,14 +122,8 @@ export function BooksProvider({ children }) {
   // PATCH /books/:id/progress - Aggiorna solo progresso
   const updateProgress = async (bookId, currentPage) => {
     try {
-      await api.patch(
-        `/books/${bookId}/progress`,
-        { currentPage }
-      ); // ✅ RIMOSSO withCredentials
-
-      // Ricarica la vista corrente per mantenere sincronizzato
+      await api.patch(`/books/${bookId}/progress`, { currentPage });
       await refreshCurrentView();
-
       return { ok: true };
     } catch (err) {
       console.error("Update progress error:", err);
@@ -139,14 +131,25 @@ export function BooksProvider({ children }) {
     }
   };
 
+  // PATCH /books/:id/favorite - Toggle preferito
+  const toggleBookFavorite = async (bookId, isFavorite) => {
+    try {
+      const res = await api.patch(`/books/${bookId}/favorite`, { is_favorite: isFavorite });
+      setBooks((prev) =>
+        prev.map((b) => (b.id === bookId ? { ...b, is_favorite: isFavorite } : b))
+      );
+      return { ok: true, book: res.data.book };
+    } catch (err) {
+      console.error("Toggle favorite error:", err);
+      return { ok: false, message: err.response?.data?.error || err.message };
+    }
+  };
+
   // DELETE /books/:id - Elimina libro
   const deleteBook = async (bookId) => {
     try {
-      await api.delete(`/books/${bookId}`); // ✅ RIMOSSO withCredentials
-
-      // Rimuovi dallo stato locale
+      await api.delete(`/books/${bookId}`);
       setBooks(books.filter((book) => book.id !== bookId));
-
       return { ok: true };
     } catch (err) {
       console.error("Delete book error:", err);
@@ -154,16 +157,31 @@ export function BooksProvider({ children }) {
     }
   };
 
-  // Calcola percentuale di lettura - USA SNAKE_CASE
+  // Calcola percentuale di lettura
   const getProgress = (book) => {
     if (!book.total_pages) return 0;
     return Math.round((book.current_page / book.total_pages) * 100);
   };
 
+  // Libri filtrati (client-side)
+  const filteredBooks = books.filter((book) => {
+    if (showOnlyFavorites && !book.is_favorite) return false;
+    if (filterGenre && book.genre !== filterGenre) return false;
+    if (filterAuthor && !book.author.toLowerCase().includes(filterAuthor.toLowerCase())) return false;
+    return true;
+  });
+
+  const resetFilters = () => {
+    setFilterGenre("");
+    setFilterAuthor("");
+    setShowOnlyFavorites(false);
+  };
+
   return (
-     <BooksContext.Provider
+    <BooksContext.Provider
       value={{
         books,
+        filteredBooks,
         loading,
         fetchBooks,
         fetchFinishedBooks,
@@ -171,8 +189,16 @@ export function BooksProvider({ children }) {
         createBook,
         updateBook,
         updateProgress,
+        toggleBookFavorite,
         deleteBook,
         getProgress,
+        filterGenre,
+        setFilterGenre,
+        filterAuthor,
+        setFilterAuthor,
+        showOnlyFavorites,
+        setShowOnlyFavorites,
+        resetFilters,
       }}
     >
       {children}

@@ -3,11 +3,11 @@ const supabase = require('../config/db_connection');
 /**
  * CREA UN NUOVO LIBRO
  */
-const createBook = async (userId, title, author, totalPages, currentPage) => {
+const createBook = async (userId, title, author, totalPages, currentPage, genre = null) => {
   if (!userId) {
     throw new Error('userId is required');
   }
-  
+
   const { data, error } = await supabase
     .from('books')
     .insert([
@@ -17,6 +17,7 @@ const createBook = async (userId, title, author, totalPages, currentPage) => {
         author,
         total_pages: totalPages,
         current_page: currentPage,
+        genre,
       },
     ])
     .select()
@@ -94,7 +95,7 @@ const getBookById = async (bookId) => {
 /**
  * UPDATE COMPLETO
  */
-const updateBook = async (bookId, title, author, totalPages, currentPage) => {
+const updateBook = async (bookId, title, author, totalPages, currentPage, genre = null) => {
   if (currentPage > totalPages) {
     throw new Error('current_page cannot exceed total_pages');
   }
@@ -105,6 +106,7 @@ const updateBook = async (bookId, title, author, totalPages, currentPage) => {
       author,
       total_pages: totalPages,
       current_page: currentPage,
+      genre,
     })
     .eq('id', bookId)
     .select()
@@ -123,6 +125,37 @@ const updateCurrentPage = async (bookId, currentPage) => {
     .eq('id', bookId)
     .select()
     .single();
+  if (error) throw error;
+  return data;
+};
+
+/**
+ * TOGGLE PREFERITO
+ */
+const toggleFavorite = async (bookId, isFavorite) => {
+  const { data, error } = await supabase
+    .from('books')
+    .update({ is_favorite: isFavorite })
+    .eq('id', bookId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+};
+
+/**
+ * LIBRI PREFERITI
+ */
+const getFavoriteBooks = async (userId) => {
+  if (!userId) {
+    throw new Error('userId is required');
+  }
+
+  const { data, error } = await supabase
+    .from('books')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('is_favorite', true);
   if (error) throw error;
   return data;
 };
@@ -147,5 +180,7 @@ module.exports = {
   getBookById,
   updateBook,
   updateCurrentPage,
+  toggleFavorite,
+  getFavoriteBooks,
   deleteBook,
 };

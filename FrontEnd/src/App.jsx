@@ -3,6 +3,7 @@ import { Home } from "./pages/Home";
 import { Login } from "./pages/Login";
 import { Dashboard } from "./pages/Dashboard";
 import { SignUp } from "./pages/SignUp";
+import { Profile } from "./pages/Profile";
 import { AuthProvider, PrivateRoute } from "./context/AuthProvider";
 import { BooksProvider } from "./context/BooksProvider";
 import { Terms } from "./pages/Terms";
@@ -25,12 +26,20 @@ function App() {
             <Route path="/cookie-policy" element={<CookiePolicy/>}/>
             <Route path="/privacy-policy" element={<Privacy/>}/>
 
-            {/* rotta protetta: avvolgiamo il componente nella PrivateRoute */}
+            {/* rotte protette */}
             <Route
               path="/dashboard"
               element={
                 <PrivateRoute>
                   <Dashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <Profile />
                 </PrivateRoute>
               }
             />

@@ -6,6 +6,8 @@ const {
   getBookById,
   updateBook,
   updateCurrentPage,
+  toggleFavorite,
+  getFavoriteBooks,
   deleteBook,
 } = require("../models/books.model");
 
@@ -103,7 +105,7 @@ const createNewBook = async (req, res) => {
       return res.status(401).json({ error: "User not authenticated" });
     }
 
-    const { title, author, total_pages, current_page } = req.body;
+    const { title, author, total_pages, current_page, genre } = req.body;
     const userId = req.user.id;
 
     // Validazione campi obbligatori
@@ -143,7 +145,8 @@ const createNewBook = async (req, res) => {
       title,
       author,
       totalPagesNum,
-      currentPageNum
+      currentPageNum,
+      genre || null
     );
 
     return res.status(201).json({
@@ -165,7 +168,7 @@ const updateBookInfo = async (req, res) => {
 
     const bookId = parseInt(req.params.id, 10);
     const userId = req.user.id;
-    const { title, author, total_pages, current_page } = req.body;
+    const { title, author, total_pages, current_page, genre } = req.body;
 
     if (isNaN(bookId)) {
       return res.status(400).json({ error: "Invalid book ID" });
@@ -215,7 +218,8 @@ const updateBookInfo = async (req, res) => {
       title,
       author,
       totalPagesNum,
-      currentPageNum
+      currentPageNum,
+      genre || null
     );
 
     return res.json({
@@ -288,6 +292,60 @@ const updateProgress = async (req, res) => {
   }
 };
 
+// GET /books/favorites - Ottieni i libri preferiti dell'utente
+const getFavoritesBooks = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    const userId = req.user.id;
+    const books = await getFavoriteBooks(userId);
+
+    return res.json({ books });
+  } catch (error) {
+    return res.status(500).json({ error: "Failed to fetch favorite books" });
+  }
+};
+
+// PATCH /books/:id/favorite - Toggle preferito
+const toggleBookFavorite = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    const bookId = parseInt(req.params.id, 10);
+    const userId = req.user.id;
+    const { is_favorite } = req.body;
+
+    if (isNaN(bookId)) {
+      return res.status(400).json({ error: "Invalid book ID" });
+    }
+
+    if (is_favorite === undefined) {
+      return res.status(400).json({ error: "Missing is_favorite field" });
+    }
+
+    const book = await getBookById(bookId);
+
+    if (!book) {
+      return res.status(404).json({ error: "Book not found" });
+    }
+
+    if (book.user_id !== userId) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
+    const updatedBook = await toggleFavorite(bookId, Boolean(is_favorite));
+
+    return res.json({ message: "Favorite updated", book: updatedBook });
+  } catch (error) {
+    console.error("Toggle favorite error:", error);
+    return res.status(500).json({ error: "Failed to update favorite" });
+  }
+};
+
 // DELETE /books/:id - Elimina un libro
 const removeBook = async (req, res) => {
   try {
@@ -326,9 +384,11 @@ module.exports = {
   getUserBooks,
   getFinishedUserBooks,
   getNotFinishedUserBooks,
+  getFavoritesBooks,
   getBook,
   createNewBook,
   updateBookInfo,
   updateProgress,
+  toggleBookFavorite,
   removeBook,
 };

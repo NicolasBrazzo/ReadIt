@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useBooks } from "../context/BooksProvider";
 import { X } from "lucide-react";
+import { BOOK_GENRES } from "../../constants";
 
 export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [totalPages, setTotalPages] = useState("");
   const [currentPage, setCurrentPage] = useState("0");
+  const [genre, setGenre] = useState("");
   const { createBook, updateBook } = useBooks();
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState("");
@@ -18,6 +20,7 @@ export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
       setAuthor(bookToEdit.author || "");
       setTotalPages(bookToEdit.total_pages?.toString() || "");
       setCurrentPage(bookToEdit.current_page?.toString() || "0");
+      setGenre(bookToEdit.genre || "");
       setIsUpdating(true);
     }
   }, [bookToEdit]);
@@ -30,24 +33,23 @@ export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
       author,
       total_pages: parseInt(totalPages),
       current_page: parseInt(currentPage),
+      genre: genre || null,
     };
 
     let result;
 
     if (isUpdating && bookToEdit) {
-      // Modalità Edit: aggiorna il libro esistente
       result = await updateBook(bookToEdit.id, bookData);
     } else {
-      // Modalità Add: crea un nuovo libro
       result = await createBook(bookData);
     }
 
     if (result.ok) {
-      // Reset form
       setTitle("");
       setAuthor("");
       setTotalPages("");
       setCurrentPage("0");
+      setGenre("");
       setOpenFormBook(false);
     } else {
       setError(result.message);
@@ -110,6 +112,23 @@ export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
             onChange={(e) => setCurrentPage(e.target.value)}
           />
         </div>
+      </div>
+
+      <div>
+        <label htmlFor="genre">Genre:</label>
+        <select
+          name="genre"
+          value={genre}
+          onChange={(e) => setGenre(e.target.value)}
+          className="w-full mt-1 px-3 py-2 border rounded bg-white text-sm"
+        >
+          <option value="">— Select genre —</option>
+          {BOOK_GENRES.map((g) => (
+            <option key={g} value={g}>
+              {g}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="text-full-center">

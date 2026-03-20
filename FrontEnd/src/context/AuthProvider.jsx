@@ -1,10 +1,7 @@
 // src/context/AuthProvider.jsx
 import { createContext, useContext, useEffect, useState } from "react";
-import axios from "axios";
 import { Navigate } from "react-router-dom";
 import api from "../api/client";
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 // Cosa fa: crea il context React che conterrà user, loading, login (e logout se aggiunto).
 // Quando è usato: al momento del rendering, permette ai componenti figli di accedere ai dati di autenticazione tramite useContext.
@@ -102,8 +99,35 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // Aggiorna profilo (nome, avatar_url)
+  const updateUserProfile = async (data) => {
+    try {
+      const res = await api.put("/profile", data);
+      if (res.data?.user) {
+        setUser((prev) => ({ ...prev, ...res.data.user }));
+      }
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, message: err.response?.data?.error || err.message };
+    }
+  };
+
+  // Cambia password
+  const changePassword = async (data) => {
+    try {
+      await api.patch("/profile/password", data);
+      return { ok: true };
+    } catch (err) {
+      return {
+        ok: false,
+        message: err.response?.data?.error || err.message,
+        details: err.response?.data?.details || [],
+      };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUserProfile, changePassword }}>
       {children}
     </AuthContext.Provider>
   );

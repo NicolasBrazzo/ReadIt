@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthProvider";
 import { User } from "lucide-react";
 
 export const Profile = () => {
-  const { user, updateUserProfile, changePassword } = useAuth();
+  const { user, logout, updateUserProfile, changePassword } = useAuth();
 
   // Dati personali
   const [name, setName] = useState(user?.name || "");
@@ -17,7 +17,11 @@ export const Profile = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordMsg, setPasswordMsg] = useState({ text: "", ok: true, details: [] });
+  const [passwordMsg, setPasswordMsg] = useState({
+    text: "",
+    ok: true,
+    details: [],
+  });
   const [passwordLoading, setPasswordLoading] = useState(false);
 
   const handleProfileSubmit = async (e) => {
@@ -39,19 +43,31 @@ export const Profile = () => {
     setPasswordMsg({ text: "", ok: true, details: [] });
 
     if (newPassword !== confirmPassword) {
-      setPasswordMsg({ text: "New passwords do not match", ok: false, details: [] });
+      setPasswordMsg({
+        text: "New passwords do not match",
+        ok: false,
+        details: [],
+      });
       return;
     }
 
     setPasswordLoading(true);
     const result = await changePassword({ currentPassword, newPassword });
     if (result.ok) {
-      setPasswordMsg({ text: "Password changed successfully!", ok: true, details: [] });
+      setPasswordMsg({
+        text: "Password changed successfully!",
+        ok: true,
+        details: [],
+      });
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } else {
-      setPasswordMsg({ text: result.message || "Change failed", ok: false, details: result.details || [] });
+      setPasswordMsg({
+        text: result.message || "Change failed",
+        ok: false,
+        details: result.details || [],
+      });
     }
     setPasswordLoading(false);
   };
@@ -63,7 +79,14 @@ export const Profile = () => {
         <h1 className="text-3xl md:text-4xl zen-dots text-white">
           <span className="text-primary">My</span> Profile
         </h1>
-
+        <div>
+          <button
+            onClick={() => logout()}
+            className="border border-white/20 px-4 py-2 text-sm text-white/60 hover:text-white hover:border-white transition-colors"
+          >
+            Logout
+          </button>
+        </div>
         {/* Sezione dati personali */}
         <div className="border-3 border-white p-1">
           <div className="border-l-4 border-b-4 border-l-primary border-b-primary p-6 flex flex-col gap-6">
@@ -71,24 +94,28 @@ export const Profile = () => {
 
             {/* Avatar preview */}
             <div className="flex items-center gap-5">
-              {avatarUrl ? (
+              {avatarUrl ?
                 <img
                   src={avatarUrl}
                   alt="Avatar"
                   className="w-20 h-20 rounded-full object-cover border-2 border-primary"
-                  onError={(e) => { e.target.style.display = "none"; }}
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                  }}
                 />
-              ) : (
-                <div className="w-20 h-20 rounded-full border-2 border-white/30 flex items-center justify-center text-white/40">
+              : <div className="w-20 h-20 rounded-full border-2 border-white/30 flex items-center justify-center text-white/40">
                   <User size={32} />
                 </div>
-              )}
+              }
               <div className="text-sm text-white/60">
                 <p>{user?.email}</p>
               </div>
             </div>
 
-            <form onSubmit={handleProfileSubmit} className="flex flex-col gap-4">
+            <form
+              onSubmit={handleProfileSubmit}
+              className="flex flex-col gap-4"
+            >
               <div>
                 <label className="block text-sm mb-1">Name</label>
                 <input
@@ -119,7 +146,13 @@ export const Profile = () => {
               </div>
 
               {profileMsg.text && (
-                <p className={profileMsg.ok ? "text-green-400 text-sm" : "text-red-400 text-sm"}>
+                <p
+                  className={
+                    profileMsg.ok ?
+                      "text-green-400 text-sm"
+                    : "text-red-400 text-sm"
+                  }
+                >
                   {profileMsg.text}
                 </p>
               )}
@@ -142,7 +175,10 @@ export const Profile = () => {
           <div className="border-l-4 border-b-4 border-l-primary border-b-primary p-6 flex flex-col gap-6">
             <h2 className="text-xl comfoorta font-bold">Change Password</h2>
 
-            <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4">
+            <form
+              onSubmit={handlePasswordSubmit}
+              className="flex flex-col gap-4"
+            >
               <div>
                 <label className="block text-sm mb-1">Current Password</label>
                 <input
@@ -164,7 +200,9 @@ export const Profile = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm mb-1">Confirm New Password</label>
+                <label className="block text-sm mb-1">
+                  Confirm New Password
+                </label>
                 <input
                   type="password"
                   value={confirmPassword}
@@ -176,7 +214,13 @@ export const Profile = () => {
 
               {passwordMsg.text && (
                 <div>
-                  <p className={passwordMsg.ok ? "text-green-400 text-sm" : "text-red-400 text-sm"}>
+                  <p
+                    className={
+                      passwordMsg.ok ?
+                        "text-green-400 text-sm"
+                      : "text-red-400 text-sm"
+                    }
+                  >
                     {passwordMsg.text}
                   </p>
                   {passwordMsg.details?.length > 0 && (

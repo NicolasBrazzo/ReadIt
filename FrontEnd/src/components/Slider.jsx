@@ -1,6 +1,7 @@
 export const Slider = () => {
   return (
     <div
+      id="slider-section"
       className="slider"
       style={{
         "--width": "500px",

@@ -44,22 +44,23 @@ const getBooksByUserId = async (userId) => {
 };
 
 /**
- * LIBRI NON FINITI - USA SOLO FILTRO JAVASCRIPT
+ * LIBRI NON FINITI
+ * Il client Supabase JS non supporta confronti colonna-colonna (current_page < total_pages)
+ * senza una VIEW o RPC. Per un'app personale con pochi libri per utente il filtro
+ * JS post-fetch è accettabile. Per scalare: creare una view `books_in_progress` in Supabase.
  */
 const getNotFinishedBooksByUserId = async (userId) => {
   if (!userId) {
     throw new Error('userId is required');
   }
-  
-  // PRENDI TUTTI I LIBRI SENZA FILTRI AGGIUNTIVI
+
   const { data, error } = await supabase
     .from('books')
     .select('*')
     .eq('user_id', userId);
-  
+
   if (error) throw error;
-  
-  // FILTRA IN JAVASCRIPT
+
   return data.filter(book => book.current_page < book.total_pages);
 };
 

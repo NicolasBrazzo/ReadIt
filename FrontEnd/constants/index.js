@@ -52,3 +52,9 @@ export const signupInputs = [
     placeholder: "Enter Password",
   },
 ];
+
+export const VIEWS = {
+  PROGRESS: "Progress",
+  ALL: "All",
+  FINISHED: "Finished",
+};

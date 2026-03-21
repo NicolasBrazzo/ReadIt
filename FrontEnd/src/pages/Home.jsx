@@ -53,7 +53,7 @@ export const Home = () => {
         >
           <button
             onClick={() => {
-              window.location.href;
+              document.getElementById("slider-section")?.scrollIntoView({ behavior: "smooth" });
             }}
             ref={movePageButtonRef}
             id="move-page-button"

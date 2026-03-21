@@ -1,7 +1,7 @@
 // Abbrevia una stringa 
 export const abbreviateText = (text, maxLength = 25) => {
     if (typeof text !== "string") {
-      return
+      return text
     }
     if(text.length <= maxLength) {
         return text;

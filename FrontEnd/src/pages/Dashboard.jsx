@@ -4,19 +4,32 @@ import { Footer } from "../components/Footer";
 import { useAuth } from "../context/AuthProvider";
 import { useBooks } from "../context/BooksProvider";
 import { AddBookForm } from "../components/AddBookForm";
-import { Check, Heart, X } from "lucide-react";
+import { Loader } from "../components/Loader";
+import { BOOK_GENRES, VIEWS } from "../../constants";
+import {
+  Check,
+  Heart,
+  X,
+  ChevronDown,
+  ChevronUp,
+  BookOpen,
+  BookMarked,
+  Library,
+  Plus,
+} from "lucide-react";
 import {
   abbreviateText,
   capitalizeFirstLetter,
 } from "../utils/utilityFunctions";
-import { BOOK_GENRES } from "../../constants";
+
 
 export const Dashboard = () => {
   const [openFormBook, setOpenFormBook] = useState(false);
-  const [booksVisualization, setBooksVisualization] = useState("Progress");
+  const [booksVisualization, setBooksVisualization] = useState(VIEWS.PROGRESS);
   const [bookToEdit, setBookToEdit] = useState(null);
+  const [expandedBookId, setExpandedBookId] = useState(null);
 
-  const { user, logout, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const {
     filteredBooks,
     loading,
@@ -42,46 +55,31 @@ export const Dashboard = () => {
     }
   }, [authLoading, user]);
 
-  const handleViewAllBooks = () => {
-    setBooksVisualization("All");
-    fetchBooks();
+  const handleViewChange = (view) => {
+    setBooksVisualization(view);
+    setExpandedBookId(null);
+    if (view === VIEWS.ALL) fetchBooks();
+    else if (view === VIEWS.PROGRESS) fetchNotFinishedBooks();
+    else if (view === VIEWS.FINISHED) fetchFinishedBooks();
   };
 
-  const handleViewInProgressBooks = () => {
-    setBooksVisualization("Progress");
-    fetchNotFinishedBooks();
-  };
-
-  const handleViewFinishedBooks = () => {
-    setBooksVisualization("Finished");
-    fetchFinishedBooks();
-  };
-
-  if (authLoading) {
-    return <div>Loading authentication...</div>;
+  if (authLoading || loading) {
+    return <Loader fullscreen />;
   }
 
   if (!user) {
     return null;
   }
 
-  if (loading) {
-    return <div>Caricamento libri...</div>;
-  }
-
   const handleUpdateProgress = async (bookId, newPage) => {
     const result = await updateProgress(bookId, newPage);
-    if (!result.ok) {
-      alert(result.message);
-    }
+    if (!result.ok) alert(result.message);
   };
 
   const handleDeleteBook = async (bookId) => {
     if (confirm("Sei sicuro di voler eliminare questo libro?")) {
       const result = await deleteBook(bookId);
-      if (!result.ok) {
-        alert(result.message);
-      }
+      if (!result.ok) alert(result.message);
     }
   };
 
@@ -101,75 +99,62 @@ export const Dashboard = () => {
 
   const hasActiveFilters = filterGenre || filterAuthor || showOnlyFavorites;
 
+  const tabs = [
+    { id: VIEWS.PROGRESS, label: "In Progress", icon: BookOpen },
+    { id: VIEWS.ALL, label: "All Books", icon: Library },
+    { id: VIEWS.FINISHED, label: "Finished", icon: BookMarked },
+  ];
+
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="m-10 flex flex-col gap-10">
-        <div className="flex flex-col xl:flex-row items-center justify-between">
-          <h1 className="text-2xl w-fit sm:3xl md:text-[50px] zen-dots text-white">
+
+      <div className="flex-1 mx-5 md:mx-10 my-8 flex flex-col gap-8">
+
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <h1 className="text-3xl md:text-5xl zen-dots text-white">
             <span className="text-primary">Welcome</span>{" "}
             {capitalizeFirstLetter(user?.name)}
           </h1>
-          <button onClick={() => logout()}>Logout</button>
-
-          <div className="flex gap-3">
-            <button
-              className="underline hover:text-primary"
-              onClick={() => {
-                if (openFormBook) {
-                  handleCloseForm();
-                } else {
-                  setBookToEdit(null);
-                  setOpenFormBook(true);
-                }
-              }}
-            >
-              {openFormBook ? "Cancel" : "Add book"}
-            </button>
-
-            <button
-              className="underline text-primary"
-              onClick={() => {
-                if (booksVisualization === "All") {
-                  handleViewInProgressBooks();
-                } else {
-                  handleViewAllBooks();
-                }
-              }}
-            >
-              {booksVisualization === "All"
-                ? "View in progress Books"
-                : "View all books"}
-            </button>
-
-            <button
-              className="underline text-primary"
-              onClick={handleViewFinishedBooks}
-            >
-              View Finished Books
-            </button>
-          </div>
+          <button
+            onClick={() => { setBookToEdit(null); setOpenFormBook(true); }}
+            className="flex items-center gap-2 bg-primary text-white px-4 py-2 hover:bg-primary/80 transition-colors"
+          >
+            <Plus size={18} /> Add Book
+          </button>
         </div>
 
-        {openFormBook && (
-          <AddBookForm
-            setOpenFormBook={handleCloseForm}
-            bookToEdit={bookToEdit}
-          />
-        )}
+        {/* Tabs */}
+        <div className="flex border-b border-white/20">
+          {tabs.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => handleViewChange(id)}
+              className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-colors border-b-2 -mb-px ${
+                booksVisualization === id
+                  ? id === VIEWS.FINISHED
+                    ? "border-green-400 text-green-400"
+                    : "border-primary text-primary"
+                  : "border-transparent text-white/50 hover:text-white"
+              }`}
+            >
+              <Icon size={16} />
+              {label}
+            </button>
+          ))}
+        </div>
 
-        {/* Barra filtri */}
-        <div className="flex flex-wrap gap-3 items-center p-4 border border-white/20 rounded bg-white/5">
+        {/* Filters */}
+        <div className="flex flex-wrap gap-3 items-center">
           <select
             value={filterGenre}
             onChange={(e) => setFilterGenre(e.target.value)}
-            className="px-3 py-2 rounded border border-white/30 bg-transparent text-white text-sm"
+            className="px-3 py-2 rounded border border-white/20 bg-black text-white text-sm"
           >
-            <option value="" className="bg-black">All genres</option>
+            <option value="">All genres</option>
             {BOOK_GENRES.map((g) => (
-              <option key={g} value={g} className="bg-black">
-                {g}
-              </option>
+              <option key={g} value={g}>{g}</option>
             ))}
           </select>
 
@@ -178,7 +163,7 @@ export const Dashboard = () => {
             placeholder="Filter by author..."
             value={filterAuthor}
             onChange={(e) => setFilterAuthor(e.target.value)}
-            className="px-3 py-2 rounded border border-white/30 bg-transparent text-white text-sm placeholder-white/40"
+            className="px-3 py-2 rounded border border-white/20 bg-black text-white text-sm placeholder-white/30 mb-0"
           />
 
           <button
@@ -186,7 +171,7 @@ export const Dashboard = () => {
             className={`flex items-center gap-2 px-3 py-2 rounded border text-sm transition-colors ${
               showOnlyFavorites
                 ? "border-primary bg-primary/20 text-primary"
-                : "border-white/30 text-white/70 hover:border-white"
+                : "border-white/20 text-white/50 hover:border-white hover:text-white"
             }`}
           >
             <Heart size={14} fill={showOnlyFavorites ? "currentColor" : "none"} />
@@ -196,119 +181,134 @@ export const Dashboard = () => {
           {hasActiveFilters && (
             <button
               onClick={resetFilters}
-              className="flex items-center gap-1 px-3 py-2 rounded border border-white/30 text-white/60 text-sm hover:text-white"
+              className="flex items-center gap-1 px-3 py-2 rounded border border-white/20 text-white/40 text-sm hover:text-white"
             >
-              <X size={12} />
-              Reset
+              <X size={12} /> Reset
             </button>
           )}
         </div>
 
-        <h2 className="comfoorta text-2xl font-bold">
-          {booksVisualization === "All"
-            ? "All books:"
-            : booksVisualization === "Finished"
-            ? "Books Finished:"
-            : booksVisualization === "Progress"
-            ? "Books in progress:"
-            : ""}
-        </h2>
+        {/* Book grid */}
+        {filteredBooks.length === 0 ? (
+          <div className="flex-center-col gap-4 py-24 text-white/40">
+            <BookOpen size={48} strokeWidth={1} />
+            <p className="text-lg">No books found — add one!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredBooks.map((book) => {
+              const isExpanded = expandedBookId === book.id;
+              const progress = getProgress(book);
+              const isFinished = book.current_page === book.total_pages;
 
-        <div className="flex flex-col flex-wrap sm:flex-row sm:gap-[5%] lg:gap-[3%]">
-          {filteredBooks.length === 0 ? (
-            <p className="text-white text-center w-full py-30">
-              No books found, add one
-            </p>
-          ) : (
-            filteredBooks.map((book) => (
-              <div
-                key={book.id}
-                className="border-3 w-full sm:w-[45%] lg:w-[30%] mb-[3%] border-white p-1"
-              >
-                <div className="w-full h-full border-l-4 border-b-4 border-l-primary border-b-primary p-6">
-                  <div className="flex justify-between items-start">
-                    <div className="text-2xl">
-                      <h3 className="font-bold">
-                        {capitalizeFirstLetter(abbreviateText(book.title))}
-                      </h3>
-                      <h4>
-                        {capitalizeFirstLetter(abbreviateText(book.author, 30))}
-                      </h4>
-                      {book.genre && (
-                        <span className="text-xs font-normal text-primary border border-primary px-2 py-0.5 rounded mt-1 inline-block">
-                          {book.genre}
-                        </span>
-                      )}
+              return (
+                <div
+                  key={book.id}
+                  className="border border-white/20 bg-white/3 flex flex-col overflow-hidden"
+                >
+                  {/* Card header — always visible */}
+                  <div className="p-4 flex flex-col gap-3">
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-white leading-tight truncate">
+                          {capitalizeFirstLetter(abbreviateText(book.title, 40))}
+                        </h3>
+                        <p className="text-white/50 text-sm truncate">
+                          {capitalizeFirstLetter(abbreviateText(book.author, 30))}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {isFinished && (
+                          <Check size={16} className="text-green-400" />
+                        )}
+                        <button
+                          onClick={() => handleToggleFavorite(book)}
+                          className="text-primary hover:scale-110 transition-transform"
+                          title={book.is_favorite ? "Remove from favorites" : "Add to favorites"}
+                        >
+                          <Heart size={16} fill={book.is_favorite ? "currentColor" : "none"} />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
-                      {book.current_page === book.total_pages && (
-                        <Check className="bg-green-400 text-black" />
-                      )}
-                      <button
-                        onClick={() => handleToggleFavorite(book)}
-                        className="text-primary hover:scale-110 transition-transform"
-                        title={book.is_favorite ? "Remove from favorites" : "Add to favorites"}
-                      >
-                        <Heart
-                          size={20}
-                          fill={book.is_favorite ? "currentColor" : "none"}
+
+                    {/* Progress bar */}
+                    <div>
+                      <div className="flex justify-between text-xs text-white/50 mb-1">
+                        <span>p. {book.current_page} / {book.total_pages}</span>
+                        <span className={isFinished ? "text-green-400" : "text-primary"}>{progress}%</span>
+                      </div>
+                      <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${isFinished ? "bg-green-400" : "bg-primary"}`}
+                          style={{ width: `${progress}%` }}
                         />
-                      </button>
-                    </div>
-                  </div>
-
-                  <hr className="my-5" />
-
-                  <div className="flex gap-5 flex-col">
-                    <div className="flex justify-between gap-3">
-                      <div className="flex-1 bg-white text-black font-semibold py-3 px-2">
-                        <h4>Progress:</h4>
-                        <p className="text-2xl font-bold">
-                          {book.current_page}/{book.total_pages}
-                        </p>
-                      </div>
-                      <div className="flex-1 bg-primary py-3 px-2">
-                        <h4>Complete:</h4>
-                        <p className="text-2xl font-bold">
-                          {getProgress(book)}%
-                        </p>
                       </div>
                     </div>
-                    <div className="flex-between-col zen-dots text-xl w-full">
-                      <button
-                        className="bg-white text-black w-full py-2"
-                        onClick={() => {
-                          handleCloseForm();
-                          handleUpdateProgress(book.id, book.current_page + 1);
-                        }}
-                      >
-                        +1 page
-                      </button>
-                    </div>
-                    <div className="flex gap-3 w-full">
-                      <button
-                        className="w-full border-2 py-2 px-4 border-white comfoorta"
-                        onClick={() => handleEditBook(book)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="w-full font-bold bg-primary py-2 px-4 comfoorta border border-white"
-                        onClick={() => {
-                          handleCloseForm();
-                          handleDeleteBook(book.id);
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </div>
+
+                    {book.genre && (
+                      <span className="text-xs text-primary border border-primary/50 px-2 py-0.5 rounded w-fit">
+                        {book.genre}
+                      </span>
+                    )}
                   </div>
+
+                  {/* Expand toggle */}
+                  <button
+                    onClick={() => setExpandedBookId(isExpanded ? null : book.id)}
+                    className="flex items-center justify-center gap-1 py-2 text-xs text-white/40 hover:text-white border-t border-white/10 transition-colors"
+                  >
+                    {isExpanded ? (
+                      <><ChevronUp size={14} /> Hide</>
+                    ) : (
+                      <><ChevronDown size={14} /> Details</>
+                    )}
+                  </button>
+
+                  {/* Expanded details */}
+                  {isExpanded && (
+                    <div className="border-t border-white/10 p-4 flex flex-col gap-3 bg-white/5">
+                      {!isFinished && (
+                        <button
+                          className="w-full bg-white text-black py-2 text-sm font-bold zen-dots hover:bg-white/90 transition-colors"
+                          onClick={() => handleUpdateProgress(book.id, book.current_page + 1)}
+                        >
+                          +1 page
+                        </button>
+                      )}
+                      <div className="flex gap-2">
+                        <button
+                          className="flex-1 border border-white/30 py-2 text-sm hover:border-white transition-colors"
+                          onClick={() => handleEditBook(book)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="flex-1 bg-primary py-2 text-sm font-bold hover:bg-primary/80 transition-colors"
+                          onClick={() => handleDeleteBook(book.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))
-          )}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      {/* Modal AddBookForm */}
+      {openFormBook && (
+        <div
+          className="fixed inset-0 bg-black/80 z-50 flex-center-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) handleCloseForm(); }}
+        >
+          <div className="w-full max-w-2xl">
+            <AddBookForm setOpenFormBook={handleCloseForm} bookToEdit={bookToEdit} />
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

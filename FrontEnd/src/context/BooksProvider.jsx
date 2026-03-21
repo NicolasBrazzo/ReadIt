@@ -35,7 +35,6 @@ export function BooksProvider({ children }) {
       setLoading(false);
     }
   };
-
   // GET /books/finished - Carica tutti i libri Finiti
   const fetchFinishedBooks = async () => {
     if (!user || authLoading) return;
@@ -56,7 +55,6 @@ export function BooksProvider({ children }) {
       setLoading(false);
     }
   };
-
   // GET /books/in_progress - Carica tutti i libri in progress
   const fetchNotFinishedBooks = async () => {
     if (!user || authLoading) return;

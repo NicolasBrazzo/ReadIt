@@ -162,6 +162,84 @@ const getFavoriteBooks = async (userId) => {
 };
 
 /**
+ * STATS UTENTE — aggrega i dati dei libri dell'utente in una sola query.
+ * Calcolo client-side perché l'app è personale (pochi libri per utente).
+ * Per scalare: spostare l'aggregazione in una VIEW o RPC Supabase.
+ */
+const getStatsByUserId = async (userId) => {
+  if (!userId) {
+    throw new Error('userId is required');
+  }
+
+  const { data: books, error } = await supabase
+    .from('books')
+    .select('*')
+    .eq('user_id', userId);
+
+  if (error) throw error;
+
+  let total_pages_read = 0;
+  let total_pages = 0;
+  let finished_count = 0;
+  let in_progress_count = 0;
+  let not_started_count = 0;
+  let favorites_count = 0;
+  let most_advanced = null;
+  let most_advanced_ratio = -1;
+  const genre_counts = {};
+
+  for (const book of books) {
+    const current = book.current_page || 0;
+    const total = book.total_pages || 0;
+
+    total_pages_read += current;
+    total_pages += total;
+    if (book.is_favorite) favorites_count++;
+
+    if (total > 0 && current >= total) {
+      finished_count++;
+    } else if (current === 0) {
+      not_started_count++;
+    } else {
+      in_progress_count++;
+      const ratio = total > 0 ? current / total : 0;
+      if (ratio > most_advanced_ratio) {
+        most_advanced_ratio = ratio;
+        most_advanced = {
+          id: book.id,
+          title: book.title,
+          author: book.author,
+          progress: Math.round(ratio * 100),
+        };
+      }
+    }
+
+    if (book.genre) {
+      genre_counts[book.genre] = (genre_counts[book.genre] || 0) + 1;
+    }
+  }
+
+  const favorite_genre =
+    Object.entries(genre_counts).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+
+  const average_progress =
+    total_pages > 0 ? Math.round((total_pages_read / total_pages) * 100) : 0;
+
+  return {
+    total_books: books.length,
+    finished_count,
+    in_progress_count,
+    not_started_count,
+    favorites_count,
+    total_pages_read,
+    total_pages,
+    average_progress,
+    most_advanced_book: most_advanced,
+    favorite_genre,
+  };
+};
+
+/**
  * DELETE
  */
 const deleteBook = async (bookId) => {
@@ -183,5 +261,6 @@ module.exports = {
   updateCurrentPage,
   toggleFavorite,
   getFavoriteBooks,
+  getStatsByUserId,
   deleteBook,
 };

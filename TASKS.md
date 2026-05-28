@@ -12,7 +12,7 @@
   - File: `FrontEnd/src/pages/Dashboard.jsx` (righe 75, 80, 83)
   - I dialoghi nativi del browser fanno sembrare l'app amatoriale.
 
-- [ ] **Loading state sui bottoni Dashboard** (`+1 pagina`, `Elimina`, `Favoriti`)
+- [x] **Loading state sui bottoni Dashboard** (`+1 pagina`, `Elimina`, `Favoriti`)
   - File: `FrontEnd/src/pages/Dashboard.jsx`
   - Evita doppi click → richieste duplicate e mostra reattività.
 

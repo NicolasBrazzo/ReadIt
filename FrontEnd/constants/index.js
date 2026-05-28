@@ -57,4 +57,5 @@ export const VIEWS = {
   PROGRESS: "Progress",
   ALL: "All",
   FINISHED: "Finished",
+  STATS: "Stats",
 };

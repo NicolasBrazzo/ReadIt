@@ -6,6 +6,7 @@ const {
   getFinishedUserBooks,
   getNotFinishedUserBooks,
   getFavoritesBooks,
+  getUserStats,
   getBook,
   createNewBook,
   updateBookInfo,
@@ -28,6 +29,9 @@ router.get("/finished", getFinishedUserBooks);
 
 // GET /books/favorites - Lista libri preferiti
 router.get("/favorites", getFavoritesBooks);
+
+// GET /books/stats - Statistiche aggregate
+router.get("/stats", getUserStats);
 
 // GET /books/:id - Singolo libro
 router.get('/:id', getBook);

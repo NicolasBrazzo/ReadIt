@@ -6,6 +6,7 @@ const BooksContext = createContext(null);
 
 export function BooksProvider({ children }) {
   const [books, setBooks] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [currentView, setCurrentView] = useState("in_progress");
   const { user, loading: authLoading } = useAuth();
@@ -160,6 +161,27 @@ export function BooksProvider({ children }) {
     if (!book.total_pages) return 0;
     return Math.round((book.current_page / book.total_pages) * 100);
   };
+  
+  // GET /books/stats - Carica le statistiche aggregate
+  const fetchStats = async () => {
+    if (!user || authLoading) return;
+
+    setLoading(true);
+    try {
+      const res = await api.get("/books/stats");
+      setStats(res.data.stats);
+      setCurrentView("stats");
+      return { ok: true };
+    } catch (err) {
+      console.error("Fetch stats error:", err);
+      if (err.response?.status === 401) {
+        return { ok: false, message: "Not authenticated" };
+      }
+      return { ok: false, message: err.response?.data?.error || err.message };
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Libri filtrati (client-side)
   const filteredBooks = books.filter((book) => {
@@ -179,11 +201,13 @@ export function BooksProvider({ children }) {
     <BooksContext.Provider
       value={{
         books,
+        stats,
         filteredBooks,
         loading,
         fetchBooks,
         fetchFinishedBooks,
         fetchNotFinishedBooks,
+        fetchStats,
         createBook,
         updateBook,
         updateProgress,

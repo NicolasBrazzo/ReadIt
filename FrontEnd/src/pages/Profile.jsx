@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../context/AuthProvider";
-import { User } from "lucide-react";
+import { User, Loader2, LogOut } from "lucide-react";
 
 export const Profile = () => {
   const { user, logout, updateUserProfile, changePassword } = useAuth();
@@ -73,49 +73,50 @@ export const Profile = () => {
   };
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="m-10 max-w-2xl mx-auto flex flex-col gap-10">
-        <h1 className="text-3xl md:text-4xl zen-dots text-white">
-          <span className="text-primary">My</span> Profile
-        </h1>
-        <div>
-          <button
-            onClick={() => logout()}
-            className="border border-white/20 px-4 py-2 text-sm text-white/60 hover:text-white hover:border-white transition-colors"
-          >
-            Logout
-          </button>
-        </div>
-        {/* Sezione dati personali */}
-        <div className="border-3 border-white p-1">
-          <div className="border-l-4 border-b-4 border-l-primary border-b-primary p-6 flex flex-col gap-6">
-            <h2 className="text-xl comfoorta font-bold">Personal Data</h2>
 
-            {/* Avatar preview */}
+      <div className="flex-1 px-5 md:px-10 my-8 flex flex-col items-center min-h-[80vh]">
+        <div className="w-full max-w-3xl flex flex-col gap-8">
+
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <h1 className="text-3xl md:text-5xl zen-dots text-white">
+              <span className="text-primary">My</span> Profile
+            </h1>
+            <button
+              onClick={() => logout()}
+              className="flex items-center gap-2 border border-white/20 px-4 py-2 text-sm text-white/60 hover:text-white hover:border-white transition-colors"
+            >
+              <LogOut size={16} /> Logout
+            </button>
+          </div>
+
+          {/* Personal Data */}
+          <section className="border border-white/20 bg-white/3 p-6 flex flex-col gap-6">
+            <h2 className="text-xl zen-dots text-white">Personal Data</h2>
+
             <div className="flex items-center gap-5">
-              {avatarUrl ?
+              {avatarUrl ? (
                 <img
                   src={avatarUrl}
                   alt="Avatar"
-                  className="w-20 h-20 rounded-full object-cover border-2 border-primary"
+                  className="w-20 h-20 rounded-full object-cover border border-primary"
                   onError={(e) => {
                     e.target.style.display = "none";
                   }}
                 />
-              : <div className="w-20 h-20 rounded-full border-2 border-white/30 flex items-center justify-center text-white/40">
+              ) : (
+                <div className="w-20 h-20 rounded-full border border-white/20 flex items-center justify-center text-white/40">
                   <User size={32} />
                 </div>
-              }
+              )}
               <div className="text-sm text-white/60">
                 <p>{user?.email}</p>
               </div>
             </div>
 
-            <form
-              onSubmit={handleProfileSubmit}
-              className="flex flex-col gap-4"
-            >
+            <form onSubmit={handleProfileSubmit} className="flex flex-col gap-4">
               <div>
                 <label className="block text-sm mb-1">Name</label>
                 <input
@@ -148,37 +149,36 @@ export const Profile = () => {
               {profileMsg.text && (
                 <p
                   className={
-                    profileMsg.ok ?
-                      "text-green-400 text-sm"
-                    : "text-red-400 text-sm"
+                    profileMsg.ok
+                      ? "text-green-400 text-sm"
+                      : "text-red-400 text-sm"
                   }
                 >
                   {profileMsg.text}
                 </p>
               )}
 
-              <div>
-                <button
-                  type="submit"
-                  disabled={profileLoading}
-                  className="text-white px-4 py-2 rounded border bg-black hover:bg-gray-950 disabled:opacity-50"
-                >
-                  {profileLoading ? "Saving..." : "Save changes"}
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={profileLoading}
+                className="self-start flex items-center gap-2 bg-primary text-white px-4 py-2 hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {profileLoading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" /> Saving...
+                  </>
+                ) : (
+                  "Save changes"
+                )}
+              </button>
             </form>
-          </div>
-        </div>
+          </section>
 
-        {/* Sezione cambio password */}
-        <div className="border-3 border-white p-1">
-          <div className="border-l-4 border-b-4 border-l-primary border-b-primary p-6 flex flex-col gap-6">
-            <h2 className="text-xl comfoorta font-bold">Change Password</h2>
+          {/* Change Password */}
+          <section className="border border-white/20 bg-white/3 p-6 flex flex-col gap-6">
+            <h2 className="text-xl zen-dots text-white">Change Password</h2>
 
-            <form
-              onSubmit={handlePasswordSubmit}
-              className="flex flex-col gap-4"
-            >
+            <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4">
               <div>
                 <label className="block text-sm mb-1">Current Password</label>
                 <input
@@ -200,9 +200,7 @@ export const Profile = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm mb-1">
-                  Confirm New Password
-                </label>
+                <label className="block text-sm mb-1">Confirm New Password</label>
                 <input
                   type="password"
                   value={confirmPassword}
@@ -216,9 +214,9 @@ export const Profile = () => {
                 <div>
                   <p
                     className={
-                      passwordMsg.ok ?
-                        "text-green-400 text-sm"
-                      : "text-red-400 text-sm"
+                      passwordMsg.ok
+                        ? "text-green-400 text-sm"
+                        : "text-red-400 text-sm"
                     }
                   >
                     {passwordMsg.text}
@@ -233,19 +231,24 @@ export const Profile = () => {
                 </div>
               )}
 
-              <div>
-                <button
-                  type="submit"
-                  disabled={passwordLoading}
-                  className="text-white px-4 py-2 rounded border bg-black hover:bg-gray-950 disabled:opacity-50"
-                >
-                  {passwordLoading ? "Changing..." : "Change password"}
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={passwordLoading}
+                className="self-start flex items-center gap-2 bg-primary text-white px-4 py-2 hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {passwordLoading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" /> Changing...
+                  </>
+                ) : (
+                  "Change password"
+                )}
+              </button>
             </form>
-          </div>
+          </section>
         </div>
       </div>
+
       <Footer />
     </div>
   );

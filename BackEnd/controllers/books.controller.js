@@ -8,6 +8,7 @@ const {
   updateCurrentPage,
   toggleFavorite,
   getFavoriteBooks,
+  getStatsByUserId,
   deleteBook,
 } = require("../models/books.model");
 
@@ -308,6 +309,21 @@ const getFavoritesBooks = async (req, res) => {
   }
 };
 
+// GET /books/stats - Statistiche aggregate dei libri dell'utente
+const getUserStats = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    const stats = await getStatsByUserId(req.user.id);
+    return res.json({ stats });
+  } catch (error) {
+    console.error("Get stats error:", error);
+    return res.status(500).json({ error: "Failed to fetch stats" });
+  }
+};
+
 // PATCH /books/:id/favorite - Toggle preferito
 const toggleBookFavorite = async (req, res) => {
   try {
@@ -385,6 +401,7 @@ module.exports = {
   getFinishedUserBooks,
   getNotFinishedUserBooks,
   getFavoritesBooks,
+  getUserStats,
   getBook,
   createNewBook,
   updateBookInfo,

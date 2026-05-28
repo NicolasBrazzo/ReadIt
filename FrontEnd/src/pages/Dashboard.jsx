@@ -17,6 +17,9 @@ import {
   Library,
   Plus,
   Loader2,
+  BarChart3,
+  TrendingUp,
+  Tag,
 } from "lucide-react";
 import {
   abbreviateText,
@@ -24,6 +27,21 @@ import {
 } from "../utils/utilityFunctions";
 import { showSuccess, showError } from "../utils/toast";
 
+
+const StatCard = ({ icon: Icon, label, value, accent }) => {
+  const accentClass =
+    accent === "green" ? "text-green-400" : accent === "primary" ? "text-primary" : "text-white";
+  return (
+    <div className="border border-white/20 bg-white/3 p-5 flex flex-col gap-2">
+      <div className="flex items-center gap-2 text-white/50 text-xs uppercase tracking-wide">
+        <Icon size={14} /> {label}
+      </div>
+      <span className={`text-3xl md:text-4xl font-bold zen-dots ${accentClass}`}>
+        {value}
+      </span>
+    </div>
+  );
+};
 
 export const Dashboard = () => {
   const [openFormBook, setOpenFormBook] = useState(false);
@@ -65,6 +83,8 @@ export const Dashboard = () => {
     showOnlyFavorites,
     setShowOnlyFavorites,
     resetFilters,
+    fetchStats,
+    stats,
   } = useBooks();
 
   useEffect(() => {
@@ -79,6 +99,7 @@ export const Dashboard = () => {
     if (view === VIEWS.ALL) fetchBooks();
     else if (view === VIEWS.PROGRESS) fetchNotFinishedBooks();
     else if (view === VIEWS.FINISHED) fetchFinishedBooks();
+    else if (view === VIEWS.STATS) fetchStats();
   };
 
   if (authLoading || loading) {
@@ -123,7 +144,10 @@ export const Dashboard = () => {
     { id: VIEWS.PROGRESS, label: "In Progress", icon: BookOpen },
     { id: VIEWS.ALL, label: "All Books", icon: Library },
     { id: VIEWS.FINISHED, label: "Finished", icon: BookMarked },
+    { id: VIEWS.STATS, label: "Stats", icon: BarChart3 },
   ];
+
+  const isStatsView = booksVisualization === VIEWS.STATS;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -165,7 +189,8 @@ export const Dashboard = () => {
           ))}
         </div>
 
-        {/* Filters */}
+        {/* Filters — nascosti in vista Stats */}
+        {!isStatsView && (
         <div className="flex flex-wrap gap-3 items-center">
           <select
             value={filterGenre}
@@ -207,9 +232,87 @@ export const Dashboard = () => {
             </button>
           )}
         </div>
+        )}
 
-        {/* Book grid */}
-        {filteredBooks.length === 0 ? (
+        {/* Stats panel */}
+        {isStatsView ? (
+          !stats ? (
+            <div className="flex-center-col gap-4 py-24 text-white/40">
+              <BarChart3 size={48} strokeWidth={1} />
+              <p className="text-lg">No stats yet — add some books!</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              {/* 4 stat numeriche */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <StatCard icon={Library} label="Total books" value={stats.total_books} />
+                <StatCard icon={BookOpen} label="In progress" value={stats.in_progress_count} />
+                <StatCard icon={BookMarked} label="Finished" value={stats.finished_count} accent="green" />
+                <StatCard icon={Heart} label="Favorites" value={stats.favorites_count} accent="primary" />
+              </div>
+
+              {/* Pagine + genere */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="md:col-span-2 border border-white/20 bg-white/3 p-6 flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                      <TrendingUp size={16} /> Average progress
+                    </div>
+                    <span className="text-primary text-2xl font-bold zen-dots">{stats.average_progress}%</span>
+                  </div>
+                  <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all"
+                      style={{ width: `${stats.average_progress}%` }}
+                    />
+                  </div>
+                  <p className="text-white/50 text-sm">
+                    {stats.total_pages_read.toLocaleString()} / {stats.total_pages.toLocaleString()} pages read
+                  </p>
+                </div>
+
+                <div className="border border-white/20 bg-white/3 p-6 flex flex-col gap-3">
+                  <div className="flex items-center gap-2 text-white/60 text-sm">
+                    <Tag size={16} /> Favorite genre
+                  </div>
+                  {stats.favorite_genre ? (
+                    <span className="text-primary text-xl zen-dots">{stats.favorite_genre}</span>
+                  ) : (
+                    <span className="text-white/30 text-sm italic">No genre yet</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Libro più avanzato */}
+              <div className="border border-white/20 bg-white/3 p-6 flex flex-col gap-3">
+                <div className="flex items-center gap-2 text-white/60 text-sm">
+                  <BookOpen size={16} /> Most advanced book
+                </div>
+                {stats.most_advanced_book ? (
+                  <>
+                    <h3 className="text-2xl zen-dots text-white">
+                      {capitalizeFirstLetter(stats.most_advanced_book.title)}
+                    </h3>
+                    <p className="text-white/50 text-sm">
+                      by {capitalizeFirstLetter(stats.most_advanced_book.author)}
+                    </p>
+                    <div className="flex items-center gap-3 mt-2">
+                      <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-primary rounded-full transition-all"
+                          style={{ width: `${stats.most_advanced_book.progress}%` }}
+                        />
+                      </div>
+                      <span className="text-primary font-bold">{stats.most_advanced_book.progress}%</span>
+                    </div>
+                  </>
+                ) : (
+                  <span className="text-white/30 text-sm italic">No book in progress</span>
+                )}
+              </div>
+            </div>
+          )
+        ) : filteredBooks.length === 0 ? (
           <div className="flex-center-col gap-4 py-24 text-white/40">
             <BookOpen size={48} strokeWidth={1} />
             <p className="text-lg">No books found — add one!</p>

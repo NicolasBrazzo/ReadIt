@@ -16,11 +16,13 @@ import {
   BookMarked,
   Library,
   Plus,
+  Loader2,
 } from "lucide-react";
 import {
   abbreviateText,
   capitalizeFirstLetter,
 } from "../utils/utilityFunctions";
+import { showSuccess, showError } from "../utils/toast";
 
 
 export const Dashboard = () => {
@@ -28,6 +30,22 @@ export const Dashboard = () => {
   const [booksVisualization, setBooksVisualization] = useState(VIEWS.PROGRESS);
   const [bookToEdit, setBookToEdit] = useState(null);
   const [expandedBookId, setExpandedBookId] = useState(null);
+  const [pendingActions, setPendingActions] = useState(new Set());
+
+  const isPending = (action, bookId) => pendingActions.has(`${action}-${bookId}`);
+  const runWithPending = async (action, bookId, fn) => {
+    const key = `${action}-${bookId}`;
+    setPendingActions((prev) => new Set(prev).add(key));
+    try {
+      await fn();
+    } finally {
+      setPendingActions((prev) => {
+        const next = new Set(prev);
+        next.delete(key);
+        return next;
+      });
+    }
+  };
 
   const { user, loading: authLoading } = useAuth();
   const {
@@ -71,17 +89,18 @@ export const Dashboard = () => {
     return null;
   }
 
-  const handleUpdateProgress = async (bookId, newPage) => {
-    const result = await updateProgress(bookId, newPage);
-    if (!result.ok) alert(result.message);
-  };
+  const handleUpdateProgress = (bookId, newPage) =>
+    runWithPending("progress", bookId, async () => {
+      const result = await updateProgress(bookId, newPage);
+      if (!result.ok) showError(result.message);
+    });
 
-  const handleDeleteBook = async (bookId) => {
-    if (confirm("Sei sicuro di voler eliminare questo libro?")) {
+  const handleDeleteBook = (bookId) =>
+    runWithPending("delete", bookId, async () => {
       const result = await deleteBook(bookId);
-      if (!result.ok) alert(result.message);
-    }
-  };
+      if (result.ok) showSuccess("Libro eliminato");
+      else showError(result.message);
+    });
 
   const handleEditBook = (book) => {
     setBookToEdit(book);
@@ -93,9 +112,10 @@ export const Dashboard = () => {
     setBookToEdit(null);
   };
 
-  const handleToggleFavorite = async (book) => {
-    await toggleBookFavorite(book.id, !book.is_favorite);
-  };
+  const handleToggleFavorite = (book) =>
+    runWithPending("favorite", book.id, async () => {
+      await toggleBookFavorite(book.id, !book.is_favorite);
+    });
 
   const hasActiveFilters = filterGenre || filterAuthor || showOnlyFavorites;
 
@@ -109,7 +129,7 @@ export const Dashboard = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
-      <div className="flex-1 mx-5 md:mx-10 my-8 flex flex-col gap-8">
+      <div className="flex-1 mx-5 md:mx-10 my-8 flex flex-col gap-8 min-h-[80vh]">
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -223,10 +243,15 @@ export const Dashboard = () => {
                         )}
                         <button
                           onClick={() => handleToggleFavorite(book)}
-                          className="text-primary hover:scale-110 transition-transform"
+                          disabled={isPending("favorite", book.id)}
+                          className="text-primary hover:scale-110 transition-transform disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
                           title={book.is_favorite ? "Remove from favorites" : "Add to favorites"}
                         >
-                          <Heart size={16} fill={book.is_favorite ? "currentColor" : "none"} />
+                          {isPending("favorite", book.id) ? (
+                            <Loader2 size={16} className="animate-spin" />
+                          ) : (
+                            <Heart size={16} fill={book.is_favorite ? "currentColor" : "none"} />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -269,24 +294,35 @@ export const Dashboard = () => {
                     <div className="border-t border-white/10 p-4 flex flex-col gap-3 bg-white/5">
                       {!isFinished && (
                         <button
-                          className="w-full bg-white text-black py-2 text-sm font-bold zen-dots hover:bg-white/90 transition-colors"
+                          className="w-full bg-white text-black py-2 text-sm font-bold zen-dots hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-center-center gap-2"
                           onClick={() => handleUpdateProgress(book.id, book.current_page + 1)}
+                          disabled={isPending("progress", book.id)}
                         >
-                          +1 page
+                          {isPending("progress", book.id) ? (
+                            <><Loader2 size={14} className="animate-spin" /> Updating...</>
+                          ) : (
+                            "+1 page"
+                          )}
                         </button>
                       )}
                       <div className="flex gap-2">
                         <button
-                          className="flex-1 border border-white/30 py-2 text-sm hover:border-white transition-colors"
+                          className="flex-1 border border-white/30 py-2 text-sm hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           onClick={() => handleEditBook(book)}
+                          disabled={isPending("delete", book.id)}
                         >
                           Edit
                         </button>
                         <button
-                          className="flex-1 bg-primary py-2 text-sm font-bold hover:bg-primary/80 transition-colors"
+                          className="flex-1 bg-primary py-2 text-sm font-bold hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-center-center gap-2"
                           onClick={() => handleDeleteBook(book.id)}
+                          disabled={isPending("delete", book.id)}
                         >
-                          Delete
+                          {isPending("delete", book.id) ? (
+                            <><Loader2 size={14} className="animate-spin" /> Deleting...</>
+                          ) : (
+                            "Delete"
+                          )}
                         </button>
                       </div>
                     </div>

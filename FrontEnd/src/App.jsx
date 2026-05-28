@@ -10,6 +10,8 @@ import { Terms } from "./pages/Terms";
 import { CookiePolicy } from "./pages/CookiePolicy";
 import { Privacy } from "./pages/Privacy";
 import { Analytics } from "@vercel/analytics/react"
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
@@ -51,6 +53,7 @@ function App() {
       </BooksProvider>
     </AuthProvider>
     <Analytics/>
+    <ToastContainer />
     </>
   );
 }

@@ -91,7 +91,7 @@ button {
 
 /* HERO SECTION */
 #hero-section {
-  background-image: url("./assets/hero-bg.png");
+  background-image: url("./assets/hero-bg.webp");
   background-repeat: no-repeat;
   background-position: center;
 }
@@ -110,7 +110,7 @@ button {
 }
 
 #usage-section {
-  background-image: url("./assets/usage-bg.png");
+  background-image: url("./assets/usage-bg.webp");
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;

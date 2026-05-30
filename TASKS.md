@@ -32,7 +32,7 @@
 
 ## Feature core per dirsi "completo"
 
-- [ ] **Stats nella Dashboard** — totale libri, pagine lette, libro più avanzato
+- [x] **Stats nella Dashboard** — totale libri, pagine lette, libro più avanzato
   - File: `FrontEnd/src/pages/Dashboard.jsx`
   - Trasforma la lista in una vera app di tracking.
 

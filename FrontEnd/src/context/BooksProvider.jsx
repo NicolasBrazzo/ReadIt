@@ -1,6 +1,15 @@
 import { createContext, useContext, useState } from "react";
 import api from "../api/client";
 import { useAuth } from "./AuthProvider";
+import { showError } from "../utils/toast";
+
+// Centralizza il toast d'errore per tutte le mutazioni del provider.
+// Gli errori 401 non vengono mostrati: l'utente sta uscendo / sessione scaduta,
+// il redirect è già gestito altrove.
+const handleMutationError = (err, fallback) => {
+  if (err.response?.status === 401) return;
+  showError(err.response?.data?.error || err.message || fallback);
+};
 
 const BooksContext = createContext(null);
 
@@ -102,6 +111,7 @@ export function BooksProvider({ children }) {
       return { ok: true, book: res.data.book };
     } catch (err) {
       console.error("Create book error:", err);
+      handleMutationError(err, "Failed to create book");
       return { ok: false, message: err.response?.data?.error || err.message };
     }
   };
@@ -114,6 +124,7 @@ export function BooksProvider({ children }) {
       return { ok: true };
     } catch (err) {
       console.error("Update book error:", err);
+      handleMutationError(err, "Failed to update book");
       return { ok: false, message: err.response?.data?.error || err.message };
     }
   };
@@ -126,6 +137,7 @@ export function BooksProvider({ children }) {
       return { ok: true };
     } catch (err) {
       console.error("Update progress error:", err);
+      handleMutationError(err, "Failed to update progress");
       return { ok: false, message: err.response?.data?.error || err.message };
     }
   };
@@ -140,6 +152,7 @@ export function BooksProvider({ children }) {
       return { ok: true, book: res.data.book };
     } catch (err) {
       console.error("Toggle favorite error:", err);
+      handleMutationError(err, "Failed to update favorite");
       return { ok: false, message: err.response?.data?.error || err.message };
     }
   };
@@ -152,6 +165,7 @@ export function BooksProvider({ children }) {
       return { ok: true };
     } catch (err) {
       console.error("Delete book error:", err);
+      handleMutationError(err, "Failed to delete book");
       return { ok: false, message: err.response?.data?.error || err.message };
     }
   };

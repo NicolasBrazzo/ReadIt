@@ -25,7 +25,7 @@ import {
   abbreviateText,
   capitalizeFirstLetter,
 } from "../utils/utilityFunctions";
-import { showSuccess, showError } from "../utils/toast";
+import { showSuccess } from "../utils/toast";
 
 
 const StatCard = ({ icon: Icon, label, value, accent }) => {
@@ -110,17 +110,21 @@ export const Dashboard = () => {
     return null;
   }
 
-  const handleUpdateProgress = (bookId, newPage) =>
+  const handleUpdateProgress = (bookId, newPage, totalPages) =>
     runWithPending("progress", bookId, async () => {
       const result = await updateProgress(bookId, newPage);
-      if (!result.ok) showError(result.message);
+      if (!result.ok) return;
+      if (newPage >= totalPages) {
+        showSuccess("Libro finito! 🎉");
+      } else {
+        showSuccess(`Pagina ${newPage}`, { autoClose: 1000 });
+      }
     });
 
   const handleDeleteBook = (bookId) =>
     runWithPending("delete", bookId, async () => {
       const result = await deleteBook(bookId);
       if (result.ok) showSuccess("Libro eliminato");
-      else showError(result.message);
     });
 
   const handleEditBook = (book) => {
@@ -135,7 +139,12 @@ export const Dashboard = () => {
 
   const handleToggleFavorite = (book) =>
     runWithPending("favorite", book.id, async () => {
-      await toggleBookFavorite(book.id, !book.is_favorite);
+      const result = await toggleBookFavorite(book.id, !book.is_favorite);
+      if (!result.ok) return;
+      showSuccess(
+        book.is_favorite ? "Removed from favorites" : "Added to favorites",
+        { autoClose: 1500 }
+      );
     });
 
   const hasActiveFilters = filterGenre || filterAuthor || showOnlyFavorites;
@@ -398,7 +407,7 @@ export const Dashboard = () => {
                       {!isFinished && (
                         <button
                           className="w-full bg-white text-black py-2 text-sm font-bold zen-dots hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-center-center gap-2"
-                          onClick={() => handleUpdateProgress(book.id, book.current_page + 1)}
+                          onClick={() => handleUpdateProgress(book.id, book.current_page + 1, book.total_pages)}
                           disabled={isPending("progress", book.id)}
                         >
                           {isPending("progress", book.id) ? (

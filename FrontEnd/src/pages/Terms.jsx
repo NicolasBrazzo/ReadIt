@@ -1,13 +1,17 @@
+import { Navbar } from "../components/Navbar";
+import { Footer } from "../components/Footer";
+
 export const Terms = () => {
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-bold mb-8 text-center">
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <div className="flex-1 w-full max-w-4xl mx-auto px-6 py-12">
+        <h1 className="text-h1 text-text mb-8 text-center">
           Termini e Condizioni d'Uso – ReadIt
         </h1>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             1. Oggetto del servizio
           </h2>
           <p className="leading-relaxed mb-3">
@@ -22,7 +26,7 @@ export const Terms = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             2. Registrazione e account
           </h2>
           <p className="leading-relaxed mb-3">
@@ -44,7 +48,7 @@ export const Terms = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             3. Utilizzo del servizio
           </h2>
 
@@ -72,7 +76,7 @@ export const Terms = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             4. Contenuti inseriti dall'utente
           </h2>
           <p className="leading-relaxed mb-3">
@@ -96,7 +100,7 @@ export const Terms = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             5. Sospensione o cessazione dell'account
           </h2>
           <p className="leading-relaxed mb-2">
@@ -117,7 +121,7 @@ export const Terms = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             6. Limitazione di responsabilità
           </h2>
           <p className="leading-relaxed mb-3">
@@ -138,7 +142,7 @@ export const Terms = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             7. Proprietà intellettuale
           </h2>
           <p className="leading-relaxed mb-3">
@@ -151,7 +155,7 @@ export const Terms = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             8. Modifiche ai Termini
           </h2>
           <p className="leading-relaxed mb-3">
@@ -164,7 +168,7 @@ export const Terms = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             9. Legge applicabile
           </h2>
           <p className="leading-relaxed">
@@ -173,12 +177,13 @@ export const Terms = () => {
           </p>
         </section>
 
-        <div className="text-center mt-12 pt-8 border-t border-gray-800">
-          <p className="text-sm text-gray-400">
+        <div className="text-center mt-12 pt-8 border-t border-border">
+          <p className="text-sm text-text-3">
             Ultimo aggiornamento: {new Date().toLocaleDateString("it-IT")}
           </p>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

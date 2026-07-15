@@ -5,12 +5,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 export const useHomeAnimations = () => {
   useGSAP(() => {
-    gsap.from("#title", {
-      opacity: 0,
-      duration: 1,
-      y: -50,
-    });
-
     gsap.from("#designedBy", {
       duration: 1,
       opacity: 0,
@@ -37,10 +31,16 @@ export const useHomeAnimations = () => {
         stagger: 0.15,
         scrollTrigger: {
           trigger: "#usage-section",
-          start: "top center", 
+          start: "top center",
           toggleActions: "play none none reverse",
         },
       }
     );
+
+    // Satoshi/JetBrains Mono load via display=swap: fallback-font layout can
+    // shift element sizes after ScrollTrigger already computed positions.
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(() => ScrollTrigger.refresh());
+    }
   }, []);
 };

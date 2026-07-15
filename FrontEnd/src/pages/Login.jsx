@@ -5,10 +5,13 @@ import { useAuth } from "../context/AuthProvider";
 import { Footer } from "../components/Footer";
 import { Form } from "../components/Form";
 import { loginInputs } from "../../constants";
+import { Button } from "../components/ui/Button";
+import { Alert } from "../components/ui/Alert";
 
 export const Login = () => {
   const [values, setValues] = useState({ email: "", password: "" });
   const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -21,7 +24,9 @@ export const Login = () => {
   // Invio dei dati onSubmit
   const handleSubmit = async () => {
     setResult("");
+    setLoading(true);
     const res = await login(values);
+    setLoading(false);
     if (res.ok) {
       setResult("SUCCESS");
       navigate("/dashboard");
@@ -34,41 +39,32 @@ export const Login = () => {
     <div>
       <Navbar />
 
-      <div className="p-6 flex-center-col mb-10 h-[80vh]">
-        <div className="line-container">
-          <div className="line"></div>
-          <div className="line"></div>
-          <div className="line"></div>
-        </div>
-
-        <h1 className="text-white underline decoration-primary text-center zen-dots text-[60px] sm:text-[65px] md:text-[75px] lg:text-[80px] my-5">
-          Lo<span className="text-primary">g</span>in
+      <div className="p-6 flex-center-col mb-10 min-h-[80vh]">
+        <h1 className="text-display text-text text-center my-5">
+          Lo<span className="text-accent">g</span>in
         </h1>
 
         <div className="w-full flex flex-col gap-5 mt-5 items-center">
           <Form inputs={loginInputs} onChange={handleChange} state={values} />
 
-          <p className="comfoorta text-center text-[20px]">
+          <p className="text-center text-[16px] text-text-2">
             You don't have an account? <br />{" "}
             <Link
               to={"/signup"}
-              className="text-blue-400 hover:text-blue-600 underline"
+              className="text-accent hover:text-accent-deep underline"
             >
               SignUp
             </Link>
           </p>
 
-          <button
-            onClick={handleSubmit}
-            className="bg-primary text-2xl font-bold text-white px-4 py-2 mt-3 ml-3 rounded"
-          >
+          <Button onClick={handleSubmit} loading={loading} size="lg">
             Login
-          </button>
+          </Button>
         </div>
 
-        {result && (
-          <div className="mt-4 ml-3 text-red-400">
-            {result}
+        {result && result !== "SUCCESS" && (
+          <div className="mt-4 w-full max-w-[500px]">
+            <Alert kind="err">{result}</Alert>
           </div>
         )}
       </div>

@@ -7,11 +7,21 @@ import { AddBookForm } from "../components/AddBookForm";
 import { Loader } from "../components/Loader";
 import { BOOK_GENRES, VIEWS } from "../../constants";
 import {
+  Card,
+  Badge,
+  ProgressBar,
+  Disclosure,
+  Button,
+  Tabs,
+  Modal,
+  EmptyState,
+  Select,
+  Input,
+} from "../components/ui";
+import {
   Check,
   Heart,
   X,
-  ChevronDown,
-  ChevronUp,
   BookOpen,
   BookMarked,
   Library,
@@ -28,18 +38,17 @@ import {
 import { showSuccess } from "../utils/toast";
 
 
-const StatCard = ({ icon: Icon, label, value, accent }) => {
-  const accentClass =
-    accent === "green" ? "text-green-400" : accent === "primary" ? "text-primary" : "text-white";
+const StatCard = ({ icon: Icon, label, value, tone }) => {
+  const toneClass = tone === "ok" ? "text-ok" : tone === "accent" ? "text-accent" : "text-text";
   return (
-    <div className="border border-white/20 bg-white/3 p-5 flex flex-col gap-2">
-      <div className="flex items-center gap-2 text-white/50 text-xs uppercase tracking-wide">
+    <Card className="p-5 flex flex-col gap-2">
+      <div className="flex items-center gap-2 text-text-3 text-[11px] uppercase tracking-wide font-mono">
         <Icon size={14} /> {label}
       </div>
-      <span className={`text-3xl md:text-4xl font-bold zen-dots ${accentClass}`}>
+      <span className={`text-3xl md:text-4xl font-black ${toneClass}`}>
         {value}
       </span>
-    </div>
+    </Card>
   );
 };
 
@@ -150,10 +159,10 @@ export const Dashboard = () => {
   const hasActiveFilters = filterGenre || filterAuthor || showOnlyFavorites;
 
   const tabs = [
-    { id: VIEWS.PROGRESS, label: "In Progress", icon: BookOpen },
-    { id: VIEWS.ALL, label: "All Books", icon: Library },
-    { id: VIEWS.FINISHED, label: "Finished", icon: BookMarked },
-    { id: VIEWS.STATS, label: "Stats", icon: BarChart3 },
+    { value: VIEWS.PROGRESS, label: "In Progress", icon: BookOpen },
+    { value: VIEWS.ALL, label: "All Books", icon: Library },
+    { value: VIEWS.FINISHED, label: "Finished", icon: BookMarked, tone: "ok" },
+    { value: VIEWS.STATS, label: "Stats", icon: BarChart3 },
   ];
 
   const isStatsView = booksVisualization === VIEWS.STATS;
@@ -166,66 +175,48 @@ export const Dashboard = () => {
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <h1 className="text-3xl md:text-5xl zen-dots text-white">
-            <span className="text-primary">Welcome</span>{" "}
+          <h1 className="text-h1 text-text">
+            <span className="text-accent">Welcome</span>{" "}
             {capitalizeFirstLetter(user?.name)}
           </h1>
-          <button
-            onClick={() => { setBookToEdit(null); setOpenFormBook(true); }}
-            className="flex items-center gap-2 bg-primary text-white px-4 py-2 hover:bg-primary/80 transition-colors"
-          >
-            <Plus size={18} /> Add Book
-          </button>
+          <Button icon={Plus} onClick={() => { setBookToEdit(null); setOpenFormBook(true); }}>
+            Add Book
+          </Button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-white/20">
-          {tabs.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => handleViewChange(id)}
-              className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold transition-colors border-b-2 -mb-px ${
-                booksVisualization === id
-                  ? id === VIEWS.FINISHED
-                    ? "border-green-400 text-green-400"
-                    : "border-primary text-primary"
-                  : "border-transparent text-white/50 hover:text-white"
-              }`}
-            >
-              <Icon size={16} />
-              {label}
-            </button>
-          ))}
-        </div>
+        <Tabs tabs={tabs} value={booksVisualization} onChange={handleViewChange} />
 
         {/* Filters — nascosti in vista Stats */}
         {!isStatsView && (
         <div className="flex flex-wrap gap-3 items-center">
-          <select
-            value={filterGenre}
-            onChange={(e) => setFilterGenre(e.target.value)}
-            className="px-3 py-2 rounded border border-white/20 bg-black text-white text-sm"
-          >
-            <option value="">All genres</option>
-            {BOOK_GENRES.map((g) => (
-              <option key={g} value={g}>{g}</option>
-            ))}
-          </select>
+          <div className="w-48">
+            <Select
+              value={filterGenre}
+              onChange={(e) => setFilterGenre(e.target.value)}
+            >
+              <option value="">All genres</option>
+              {BOOK_GENRES.map((g) => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </Select>
+          </div>
 
-          <input
-            type="text"
-            placeholder="Filter by author..."
-            value={filterAuthor}
-            onChange={(e) => setFilterAuthor(e.target.value)}
-            className="px-3 py-2 rounded border border-white/20 bg-black text-white text-sm placeholder-white/30 mb-0"
-          />
+          <div className="w-56">
+            <Input
+              type="text"
+              placeholder="Filter by author..."
+              value={filterAuthor}
+              onChange={(e) => setFilterAuthor(e.target.value)}
+            />
+          </div>
 
           <button
             onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
-            className={`flex items-center gap-2 px-3 py-2 rounded border text-sm transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-field border text-[13px] font-mono transition-colors ${
               showOnlyFavorites
-                ? "border-primary bg-primary/20 text-primary"
-                : "border-white/20 text-white/50 hover:border-white hover:text-white"
+                ? "border-accent bg-accent-soft text-accent-text"
+                : "border-border text-text-2 hover:border-text-3 hover:text-text"
             }`}
           >
             <Heart size={14} fill={showOnlyFavorites ? "currentColor" : "none"} />
@@ -235,7 +226,7 @@ export const Dashboard = () => {
           {hasActiveFilters && (
             <button
               onClick={resetFilters}
-              className="flex items-center gap-1 px-3 py-2 rounded border border-white/20 text-white/40 text-sm hover:text-white"
+              className="flex items-center gap-1 px-3 py-2.5 text-text-3 text-[13px] font-mono hover:text-text transition-colors"
             >
               <X size={12} /> Reset
             </button>
@@ -246,86 +237,83 @@ export const Dashboard = () => {
         {/* Stats panel */}
         {isStatsView ? (
           !stats ? (
-            <div className="flex-center-col gap-4 py-24 text-white/40">
-              <BarChart3 size={48} strokeWidth={1} />
-              <p className="text-lg">No stats yet — add some books!</p>
-            </div>
+            <EmptyState
+              icon={BarChart3}
+              title="No stats yet"
+              description="Add some books to start tracking your reading stats."
+            />
           ) : (
             <div className="flex flex-col gap-4">
               {/* 4 stat numeriche */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatCard icon={Library} label="Total books" value={stats.total_books} />
                 <StatCard icon={BookOpen} label="In progress" value={stats.in_progress_count} />
-                <StatCard icon={BookMarked} label="Finished" value={stats.finished_count} accent="green" />
-                <StatCard icon={Heart} label="Favorites" value={stats.favorites_count} accent="primary" />
+                <StatCard icon={BookMarked} label="Finished" value={stats.finished_count} tone="ok" />
+                <StatCard icon={Heart} label="Favorites" value={stats.favorites_count} tone="accent" />
               </div>
 
               {/* Pagine + genere */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-2 border border-white/20 bg-white/3 p-6 flex flex-col gap-3">
+                <Card className="md:col-span-2 p-6 flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-white/60 text-sm">
+                    <div className="flex items-center gap-2 text-text-2 text-[14px]">
                       <TrendingUp size={16} /> Average progress
                     </div>
-                    <span className="text-primary text-2xl font-bold zen-dots">{stats.average_progress}%</span>
+                    <span className="text-accent text-2xl font-black">{stats.average_progress}%</span>
                   </div>
-                  <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-primary rounded-full transition-all"
-                      style={{ width: `${stats.average_progress}%` }}
-                    />
-                  </div>
-                  <p className="text-white/50 text-sm">
+                  <ProgressBar value={stats.average_progress} />
+                  <p className="text-text-3 text-[14px]">
                     {stats.total_pages_read.toLocaleString()} / {stats.total_pages.toLocaleString()} pages read
                   </p>
-                </div>
+                </Card>
 
-                <div className="border border-white/20 bg-white/3 p-6 flex flex-col gap-3">
-                  <div className="flex items-center gap-2 text-white/60 text-sm">
+                <Card className="p-6 flex flex-col gap-3">
+                  <div className="flex items-center gap-2 text-text-2 text-[14px]">
                     <Tag size={16} /> Favorite genre
                   </div>
                   {stats.favorite_genre ? (
-                    <span className="text-primary text-xl zen-dots">{stats.favorite_genre}</span>
+                    <span className="text-accent text-xl font-bold">{stats.favorite_genre}</span>
                   ) : (
-                    <span className="text-white/30 text-sm italic">No genre yet</span>
+                    <span className="text-text-3 text-[14px] italic">No genre yet</span>
                   )}
-                </div>
+                </Card>
               </div>
 
               {/* Libro più avanzato */}
-              <div className="border border-white/20 bg-white/3 p-6 flex flex-col gap-3">
-                <div className="flex items-center gap-2 text-white/60 text-sm">
+              <Card className="p-6 flex flex-col gap-3">
+                <div className="flex items-center gap-2 text-text-2 text-[14px]">
                   <BookOpen size={16} /> Most advanced book
                 </div>
                 {stats.most_advanced_book ? (
                   <>
-                    <h3 className="text-2xl zen-dots text-white">
+                    <h3 className="text-h2 text-text">
                       {capitalizeFirstLetter(stats.most_advanced_book.title)}
                     </h3>
-                    <p className="text-white/50 text-sm">
+                    <p className="text-text-3 text-[14px]">
                       by {capitalizeFirstLetter(stats.most_advanced_book.author)}
                     </p>
                     <div className="flex items-center gap-3 mt-2">
-                      <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary rounded-full transition-all"
-                          style={{ width: `${stats.most_advanced_book.progress}%` }}
-                        />
-                      </div>
-                      <span className="text-primary font-bold">{stats.most_advanced_book.progress}%</span>
+                      <ProgressBar value={stats.most_advanced_book.progress} trackClassName="flex-1" />
+                      <span className="text-accent font-bold">{stats.most_advanced_book.progress}%</span>
                     </div>
                   </>
                 ) : (
-                  <span className="text-white/30 text-sm italic">No book in progress</span>
+                  <span className="text-text-3 text-[14px] italic">No book in progress</span>
                 )}
-              </div>
+              </Card>
             </div>
           )
         ) : filteredBooks.length === 0 ? (
-          <div className="flex-center-col gap-4 py-24 text-white/40">
-            <BookOpen size={48} strokeWidth={1} />
-            <p className="text-lg">No books found — add one!</p>
-          </div>
+          <EmptyState
+            icon={BookOpen}
+            title="No books found"
+            description="Add your first book to start tracking your progress."
+            action={
+              <Button icon={Plus} onClick={() => { setBookToEdit(null); setOpenFormBook(true); }}>
+                Add Book
+              </Button>
+            }
+          />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredBooks.map((book) => {
@@ -334,29 +322,26 @@ export const Dashboard = () => {
               const isFinished = book.current_page === book.total_pages;
 
               return (
-                <div
-                  key={book.id}
-                  className="border border-white/20 bg-white/3 flex flex-col overflow-hidden"
-                >
+                <Card key={book.id} className="flex flex-col overflow-hidden">
                   {/* Card header — always visible */}
                   <div className="p-4 flex flex-col gap-3">
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-white leading-tight truncate">
+                        <h3 className="font-bold text-text leading-tight truncate">
                           {capitalizeFirstLetter(abbreviateText(book.title, 40))}
                         </h3>
-                        <p className="text-white/50 text-sm truncate">
+                        <p className="text-text-2 text-[14px] truncate">
                           {capitalizeFirstLetter(abbreviateText(book.author, 30))}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {isFinished && (
-                          <Check size={16} className="text-green-400" />
+                          <Check size={16} className="text-ok" />
                         )}
                         <button
                           onClick={() => handleToggleFavorite(book)}
                           disabled={isPending("favorite", book.id)}
-                          className="text-primary hover:scale-110 transition-transform disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                          className="text-accent hover:scale-110 transition-transform disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
                           title={book.is_favorite ? "Remove from favorites" : "Add to favorites"}
                         >
                           {isPending("favorite", book.id) ? (
@@ -370,93 +355,75 @@ export const Dashboard = () => {
 
                     {/* Progress bar */}
                     <div>
-                      <div className="flex justify-between text-xs text-white/50 mb-1">
+                      <div className="flex justify-between text-[12px] text-text-3 mb-1">
                         <span>p. {book.current_page} / {book.total_pages}</span>
-                        <span className={isFinished ? "text-green-400" : "text-primary"}>{progress}%</span>
+                        <span className={isFinished ? "text-ok" : "text-accent"}>{progress}%</span>
                       </div>
-                      <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all ${isFinished ? "bg-green-400" : "bg-primary"}`}
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
+                      <ProgressBar value={progress} tone={isFinished ? "ok" : "accent"} />
                     </div>
 
                     {book.genre && (
-                      <span className="text-xs text-primary border border-primary/50 px-2 py-0.5 rounded w-fit">
+                      <Badge variant="outline" tone="accent" className="w-fit">
                         {book.genre}
-                      </span>
+                      </Badge>
                     )}
                   </div>
 
-                  {/* Expand toggle */}
-                  <button
-                    onClick={() => setExpandedBookId(isExpanded ? null : book.id)}
-                    className="flex items-center justify-center gap-1 py-2 text-xs text-white/40 hover:text-white border-t border-white/10 transition-colors"
+                  {/* Expand toggle + details */}
+                  <Disclosure
+                    open={isExpanded}
+                    onToggle={() => setExpandedBookId(isExpanded ? null : book.id)}
+                    label={isExpanded ? "Hide" : "Details"}
+                    className="px-4"
                   >
-                    {isExpanded ? (
-                      <><ChevronUp size={14} /> Hide</>
-                    ) : (
-                      <><ChevronDown size={14} /> Details</>
-                    )}
-                  </button>
-
-                  {/* Expanded details */}
-                  {isExpanded && (
-                    <div className="border-t border-white/10 p-4 flex flex-col gap-3 bg-white/5">
+                    <div className="flex flex-col gap-3">
                       {!isFinished && (
-                        <button
-                          className="w-full bg-white text-black py-2 text-sm font-bold zen-dots hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-center-center gap-2"
+                        <Button
+                          size="sm"
+                          className="w-full"
+                          loading={isPending("progress", book.id)}
                           onClick={() => handleUpdateProgress(book.id, book.current_page + 1, book.total_pages)}
-                          disabled={isPending("progress", book.id)}
                         >
-                          {isPending("progress", book.id) ? (
-                            <><Loader2 size={14} className="animate-spin" /> Updating...</>
-                          ) : (
-                            "+1 page"
-                          )}
-                        </button>
+                          {isPending("progress", book.id) ? "Updating..." : "+1 page"}
+                        </Button>
                       )}
                       <div className="flex gap-2">
-                        <button
-                          className="flex-1 border border-white/30 py-2 text-sm hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          onClick={() => handleEditBook(book)}
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="flex-1"
                           disabled={isPending("delete", book.id)}
+                          onClick={() => handleEditBook(book)}
                         >
                           Edit
-                        </button>
-                        <button
-                          className="flex-1 bg-primary py-2 text-sm font-bold hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-center-center gap-2"
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="flex-1"
+                          loading={isPending("delete", book.id)}
                           onClick={() => handleDeleteBook(book.id)}
-                          disabled={isPending("delete", book.id)}
                         >
-                          {isPending("delete", book.id) ? (
-                            <><Loader2 size={14} className="animate-spin" /> Deleting...</>
-                          ) : (
-                            "Delete"
-                          )}
-                        </button>
+                          {isPending("delete", book.id) ? "Deleting..." : "Delete"}
+                        </Button>
                       </div>
                     </div>
-                  )}
-                </div>
+                  </Disclosure>
+                </Card>
               );
             })}
           </div>
         )}
       </div>
 
-      {/* Modal AddBookForm */}
-      {openFormBook && (
-        <div
-          className="fixed inset-0 bg-black/80 z-50 flex-center-center p-4"
-          onClick={(e) => { if (e.target === e.currentTarget) handleCloseForm(); }}
-        >
-          <div className="w-full max-w-2xl">
-            <AddBookForm setOpenFormBook={handleCloseForm} bookToEdit={bookToEdit} />
-          </div>
-        </div>
-      )}
+      <Modal
+        open={openFormBook}
+        onClose={handleCloseForm}
+        title={bookToEdit ? "Edit Book" : "Add New Book"}
+        size="lg"
+      >
+        <AddBookForm setOpenFormBook={handleCloseForm} bookToEdit={bookToEdit} />
+      </Modal>
 
       <Footer />
     </div>

@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
-import { User } from "lucide-react";
+import { Avatar } from "./ui/Avatar";
 
 export const Navbar = () => {
   const { user } = useAuth();
 
   return (
-    <nav className="w-full flex gap-5 justify-center md:justify-between px-5 mt-7 md:text-4xl zen-dots">
+    <nav className="w-full flex gap-5 justify-center md:justify-between px-5 mt-7 md:text-4xl font-bold text-text">
       <div>
         <Link className="link" to={"/"}>
           Home <div className="line-navbar"></div>
@@ -18,16 +18,7 @@ export const Navbar = () => {
         </Link>
         {user ? (
           <Link className="link flex items-center gap-2" to={"/profile"}>
-            {user.avatar_url ? (
-              <img
-                src={user.avatar_url}
-                alt="avatar"
-                className="w-8 h-8 rounded-full object-cover border border-primary"
-                onError={(e) => { e.target.style.display = "none"; }}
-              />
-            ) : (
-              <User size={20} className="text-primary" />
-            )}
+            <Avatar src={user.avatar_url} name={user.name} size="sm" />
             Profile <div className="line-navbar"></div>
           </Link>
         ) : (

@@ -1,13 +1,17 @@
+import { Navbar } from "../components/Navbar";
+import { Footer } from "../components/Footer";
+
 export const CookiePolicy = () => {
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-bold mb-8 text-center">
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <div className="flex-1 w-full max-w-4xl mx-auto px-6 py-12">
+        <h1 className="text-h1 text-text mb-8 text-center">
           Cookie Policy – ReadIt
         </h1>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             1. Cosa sono i cookie
           </h2>
           <p className="leading-relaxed">
@@ -18,7 +22,7 @@ export const CookiePolicy = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             2. Tipologie di cookie utilizzati
           </h2>
           <p className="leading-relaxed mb-4">
@@ -39,7 +43,7 @@ export const CookiePolicy = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             3. Cookie di terze parti
           </h2>
           <p className="leading-relaxed mb-3">
@@ -53,7 +57,7 @@ export const CookiePolicy = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             4. Consenso
           </h2>
           <p className="leading-relaxed">
@@ -63,7 +67,7 @@ export const CookiePolicy = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             5. Gestione dei cookie
           </h2>
           <p className="leading-relaxed mb-3">
@@ -77,7 +81,7 @@ export const CookiePolicy = () => {
         </section>
 
         <section className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-primary">
+          <h2 className="text-h2 text-accent mb-4">
             6. Modifiche alla Cookie Policy
           </h2>
           <p className="leading-relaxed">
@@ -86,12 +90,13 @@ export const CookiePolicy = () => {
           </p>
         </section>
 
-        <div className="text-center mt-12 pt-8 border-t border-gray-800">
-          <p className="text-sm text-gray-400">
+        <div className="text-center mt-12 pt-8 border-t border-border">
+          <p className="text-sm text-text-3">
             Ultimo aggiornamento: {new Date().toLocaleDateString("it-IT")}
           </p>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

@@ -1,5 +1,5 @@
 .slider{
-    background: var(--primary);
+    background: var(--color-accent);
     width: 100%;
     height: var(--height);
     overflow-x: hidden;
@@ -31,6 +31,7 @@
     align-items: center;
     font-size: 22px;
     font-weight: 500;
+    color: var(--color-accent-contrast);
 }
 .slider .list .item img{
     width: 100%;

@@ -1,13 +1,89 @@
 @import "tailwindcss";
 
-:root {
-  --bg-body: #000000;
-  --text-color: #ffffff;
-  --primary: #f6330f;
+/*
+  Design tokens — "Tre" design system, light mode only.
+*/
+@theme {
+  /* Neutri */
+  --color-bg: #FAF8F5;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F2EFE9;
+  --color-border: #E7E2D9;
+  --color-text: #1C1A16;
+  --color-text-2: #6C665C;
+  --color-text-3: #A8A294;
+
+  /* Accento — Terracotta */
+  --color-accent: #C2592F;
+  --color-accent-deep: #9E441F;
+  --color-accent-soft: #F6E7DE;
+  --color-accent-text: #9E441F;
+  --color-accent-contrast: #FFFFFF;
+
+  /* Semantici */
+  --color-ok: #1F8A5B;
+  --color-ok-soft: #E2F1E9;
+  --color-warn: #B5791A;
+  --color-warn-soft: #F6ECD6;
+  --color-err: #C23F3F;
+  --color-err-soft: #F8E3E3;
+  --color-info: #2A6FDB;
+  --color-info-soft: #E5ECFB;
+
+  /* Raggio */
+  --radius-field: 14px;
+  --radius-card: 24px;
+
+  /* Ombre */
+  --shadow-1: 0 1px 2px rgba(28, 26, 22, .06);
+  --shadow-2: 0 8px 22px rgba(28, 26, 22, .09);
+  --shadow-3: 0 22px 54px rgba(28, 26, 22, .14);
+
+  /* Font */
+  --font-sans: "Satoshi", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* Scala tipografica */
+  --text-display: 40px;
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -1.5px;
+  --text-display--font-weight: 900;
+
+  --text-h1: 30px;
+  --text-h1--line-height: 1.15;
+  --text-h1--letter-spacing: -1px;
+  --text-h1--font-weight: 700;
+
+  --text-h2: 23px;
+  --text-h2--line-height: 1.2;
+  --text-h2--letter-spacing: -.6px;
+  --text-h2--font-weight: 700;
+
+  --text-lead: 19px;
+  --text-lead--line-height: 1.5;
+  --text-lead--font-weight: 500;
+
+  --text-caption: 12px;
+  --text-caption--letter-spacing: .5px;
 }
 
-@theme {
-  --color-primary: #f6330f;
+:root {
+  --dot: rgba(28, 26, 22, .055);
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dialogIn {
+  from { opacity: 0; transform: translateY(12px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 html {
@@ -15,18 +91,10 @@ html {
 }
 
 body {
-  background: var(--bg-body);
-  color: var(--text-color);
-}
-
-label {
-  @apply text-[18px];
-  font-family: "Comfortaa";
-}
-
-input {
-  /* @apply   p-2 border border-slate-500 rounded-xl; */
-  @apply border p-2 rounded bg-black/90 block
+  background-color: var(--color-bg);
+  background-image: radial-gradient(var(--dot) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+  color: var(--color-text);
 }
 
 button {
@@ -47,7 +115,7 @@ button {
     .flex-center-around {
         @apply flex justify-around items-center;
     }
-    
+
     .flex-center-col {
         @apply flex flex-col justify-center items-center;
     }
@@ -55,11 +123,11 @@ button {
     .flex-between-col {
         @apply flex flex-col justify-between items-center;
     }
-    
+
     .flex-center-between {
         @apply flex items-center justify-between;
     }
-    
+
     .flex-div-full {
         @apply flex items-center flex-1;
     }
@@ -67,12 +135,6 @@ button {
     .text-full-center {
       @apply w-full text-center
     }
-}
-
-/* COMPONENTS */
-/* add book form  */
-#addBookForm input {
-  @apply w-full mb-6 mt-3
 }
 
 /* NAVBAR */
@@ -85,15 +147,8 @@ button {
   display: block;
   width: 0;
   height: 2px;
-  background: white;
+  background: var(--color-accent);
   transition: width 0.5s ease-out;
-}
-
-/* HERO SECTION */
-#hero-section {
-  background-image: url("./assets/hero-bg.webp");
-  background-repeat: no-repeat;
-  background-position: center;
 }
 
 .circle,
@@ -102,11 +157,11 @@ button {
 }
 
 .circle {
-  background: var(--primary);
+  background: var(--color-accent);
 }
 
 .circle-cta {
-  background: var(--text-color);
+  background: var(--color-accent);
 }
 
 #usage-section {
@@ -116,19 +171,27 @@ button {
   background-size: cover;
 }
 
-.line-container {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  position: absolute;
-  z-index: -1;
-  gap: 20px;
-  height: 100%;
-  width: 100%;
+/* TOAST — restyling react-toastify sui token del design system */
+:root {
+  --toastify-color-light: var(--color-surface);
+  --toastify-color-dark: var(--color-text);
+  --toastify-color-info: var(--color-info);
+  --toastify-color-success: var(--color-ok);
+  --toastify-color-warning: var(--color-warn);
+  --toastify-color-error: var(--color-err);
+  --toastify-text-color-light: var(--color-text);
+  --toastify-font-family: var(--font-sans);
 }
 
-.line {
-  height: 100%;
-  width: 1px;
-  background: rgba(128, 128, 128, 0.333);
+.Toastify__toast {
+  border-radius: var(--radius-field);
+  box-shadow: var(--shadow-3);
+  font-family: var(--font-sans);
+  font-size: 14px;
+}
+
+.Toastify__toast-theme--light {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
 }

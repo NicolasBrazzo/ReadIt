@@ -2,7 +2,13 @@ import { useState } from "react";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../context/AuthProvider";
-import { User, Loader2, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
+import { Card } from "../components/ui/Card";
+import { Avatar } from "../components/ui/Avatar";
+import { Field } from "../components/ui/Field";
+import { Input } from "../components/ui/Input";
+import { Button } from "../components/ui/Button";
+import { Alert } from "../components/ui/Alert";
 
 export const Profile = () => {
   const { user, logout, updateUserProfile, changePassword } = useAuth();
@@ -81,171 +87,119 @@ export const Profile = () => {
 
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <h1 className="text-3xl md:text-5xl zen-dots text-white">
-              <span className="text-primary">My</span> Profile
+            <h1 className="text-h1 text-text">
+              <span className="text-accent">My</span> Profile
             </h1>
-            <button
-              onClick={() => logout()}
-              className="flex items-center gap-2 border border-white/20 px-4 py-2 text-sm text-white/60 hover:text-white hover:border-white transition-colors"
-            >
-              <LogOut size={16} /> Logout
-            </button>
+            <Button variant="secondary" size="sm" icon={LogOut} onClick={() => logout()}>
+              Logout
+            </Button>
           </div>
 
           {/* Personal Data */}
-          <section className="border border-white/20 bg-white/3 p-6 flex flex-col gap-6">
-            <h2 className="text-xl zen-dots text-white">Personal Data</h2>
+          <Card className="p-6 flex flex-col gap-6">
+            <h2 className="text-h2 text-text">Personal Data</h2>
 
             <div className="flex items-center gap-5">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt="Avatar"
-                  className="w-20 h-20 rounded-full object-cover border border-primary"
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                  }}
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-full border border-white/20 flex items-center justify-center text-white/40">
-                  <User size={32} />
-                </div>
-              )}
-              <div className="text-sm text-white/60">
+              <Avatar src={avatarUrl} name={name || user?.email} size="lg" />
+              <div className="text-[14px] text-text-2">
                 <p>{user?.email}</p>
               </div>
             </div>
 
             <form onSubmit={handleProfileSubmit} className="flex flex-col gap-4">
-              <div>
-                <label className="block text-sm mb-1">Name</label>
-                <input
+              <Field label="Name" htmlFor="profile-name">
+                <Input
+                  id="profile-name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your name..."
                   required
                 />
-              </div>
-              <div>
-                <label className="block text-sm mb-1">Email</label>
-                <input
+              </Field>
+              <Field label="Email" htmlFor="profile-email">
+                <Input
+                  id="profile-email"
                   type="email"
                   value={user?.email || ""}
                   readOnly
                   className="opacity-50 cursor-not-allowed"
                 />
-              </div>
-              <div>
-                <label className="block text-sm mb-1">Avatar URL</label>
-                <input
+              </Field>
+              <Field label="Avatar URL" htmlFor="profile-avatar">
+                <Input
+                  id="profile-avatar"
                   type="url"
                   value={avatarUrl}
                   onChange={(e) => setAvatarUrl(e.target.value)}
                   placeholder="https://example.com/avatar.jpg"
                 />
-              </div>
+              </Field>
 
               {profileMsg.text && (
-                <p
-                  className={
-                    profileMsg.ok
-                      ? "text-green-400 text-sm"
-                      : "text-red-400 text-sm"
-                  }
-                >
-                  {profileMsg.text}
-                </p>
+                <Alert kind={profileMsg.ok ? "ok" : "err"}>{profileMsg.text}</Alert>
               )}
 
-              <button
-                type="submit"
-                disabled={profileLoading}
-                className="self-start flex items-center gap-2 bg-primary text-white px-4 py-2 hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {profileLoading ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" /> Saving...
-                  </>
-                ) : (
-                  "Save changes"
-                )}
-              </button>
+              <Button type="submit" loading={profileLoading} className="self-start">
+                {profileLoading ? "Saving..." : "Save changes"}
+              </Button>
             </form>
-          </section>
+          </Card>
 
           {/* Change Password */}
-          <section className="border border-white/20 bg-white/3 p-6 flex flex-col gap-6">
-            <h2 className="text-xl zen-dots text-white">Change Password</h2>
+          <Card className="p-6 flex flex-col gap-6">
+            <h2 className="text-h2 text-text">Change Password</h2>
 
             <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-4">
-              <div>
-                <label className="block text-sm mb-1">Current Password</label>
-                <input
+              <Field label="Current Password" htmlFor="current-password">
+                <Input
+                  id="current-password"
                   type="password"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   placeholder="Current password..."
                   required
                 />
-              </div>
-              <div>
-                <label className="block text-sm mb-1">New Password</label>
-                <input
+              </Field>
+              <Field label="New Password" htmlFor="new-password">
+                <Input
+                  id="new-password"
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="New password..."
                   required
                 />
-              </div>
-              <div>
-                <label className="block text-sm mb-1">Confirm New Password</label>
-                <input
+              </Field>
+              <Field label="Confirm New Password" htmlFor="confirm-password">
+                <Input
+                  id="confirm-password"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Confirm new password..."
                   required
                 />
-              </div>
+              </Field>
 
               {passwordMsg.text && (
-                <div>
-                  <p
-                    className={
-                      passwordMsg.ok
-                        ? "text-green-400 text-sm"
-                        : "text-red-400 text-sm"
-                    }
-                  >
-                    {passwordMsg.text}
-                  </p>
+                <Alert kind={passwordMsg.ok ? "ok" : "err"}>
+                  {passwordMsg.text}
                   {passwordMsg.details?.length > 0 && (
-                    <ul className="mt-1 text-red-400 text-xs list-disc list-inside">
+                    <ul className="mt-1 list-disc list-inside">
                       {passwordMsg.details.map((d, i) => (
                         <li key={i}>{d}</li>
                       ))}
                     </ul>
                   )}
-                </div>
+                </Alert>
               )}
 
-              <button
-                type="submit"
-                disabled={passwordLoading}
-                className="self-start flex items-center gap-2 bg-primary text-white px-4 py-2 hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {passwordLoading ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" /> Changing...
-                  </>
-                ) : (
-                  "Change password"
-                )}
-              </button>
+              <Button type="submit" loading={passwordLoading} className="self-start">
+                {passwordLoading ? "Changing..." : "Change password"}
+              </Button>
             </form>
-          </section>
+          </Card>
         </div>
       </div>
 

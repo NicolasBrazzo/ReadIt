@@ -1,19 +1,11 @@
 import { useState, useEffect } from "react";
 import { useBooks } from "../context/BooksProvider";
-import { X } from "lucide-react";
 import { BOOK_GENRES } from "../../constants";
-
-const Field = ({ label, children }) => (
-  <div className="flex flex-col gap-1">
-    <label className="text-xs text-white/50 uppercase tracking-widest font-semibold">
-      {label}
-    </label>
-    {children}
-  </div>
-);
-
-const inputClass =
-  "w-full bg-transparent border border-white/20 px-3 py-2 text-sm text-white placeholder-white/25 focus:outline-none focus:border-primary transition-colors rounded-none mb-0";
+import { Field } from "./ui/Field";
+import { Input } from "./ui/Input";
+import { Select } from "./ui/Select";
+import { Button } from "./ui/Button";
+import { Alert } from "./ui/Alert";
 
 export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
   const [title, setTitle] = useState("");
@@ -24,6 +16,7 @@ export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
   const { createBook, updateBook } = useBooks();
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (bookToEdit) {
@@ -38,6 +31,7 @@ export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
 
     const bookData = {
       title,
@@ -50,6 +44,8 @@ export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
     const result = isUpdating && bookToEdit
       ? await updateBook(bookToEdit.id, bookData)
       : await createBook(bookData);
+
+    setSubmitting(false);
 
     if (result.ok) {
       setTitle("");
@@ -64,104 +60,78 @@ export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
   };
 
   return (
-    <div className="bg-black border border-white/20 border-l-2 border-l-primary">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-        <h2 className="zen-dots text-lg text-white">
-          {isUpdating ? "Edit Book" : "Add New Book"}
-        </h2>
-        <button
-          type="button"
-          onClick={() => setOpenFormBook(false)}
-          className="text-white/40 hover:text-white transition-colors"
-        >
-          <X size={18} />
-        </button>
-      </div>
-
-      {/* Form */}
-      <form id="addBookForm" onSubmit={handleSubmit} className="p-6 flex flex-col gap-5">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <Field label="Title">
-            <input
-              type="text"
-              name="title"
-              placeholder="Book title..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className={inputClass}
-              required
-            />
-          </Field>
-
-          <Field label="Author">
-            <input
-              name="author"
-              type="text"
-              placeholder="Author name..."
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-              className={inputClass}
-              required
-            />
-          </Field>
-
-          <Field label="Total Pages">
-            <input
-              name="totPages"
-              type="number"
-              placeholder="e.g. 320"
-              value={totalPages}
-              onChange={(e) => setTotalPages(e.target.value)}
-              className={inputClass}
-              required
-            />
-          </Field>
-
-          <Field label="Current Page">
-            <input
-              name="curPages"
-              type="number"
-              placeholder="e.g. 0"
-              value={currentPage}
-              onChange={(e) => setCurrentPage(e.target.value)}
-              className={inputClass}
-            />
-          </Field>
-        </div>
-
-        <Field label="Genre">
-          <select
-            name="genre"
-            value={genre}
-            onChange={(e) => setGenre(e.target.value)}
-            className={inputClass}
-          >
-            <option value="" className="bg-black">— Select genre —</option>
-            {BOOK_GENRES.map((g) => (
-              <option key={g} value={g} className="bg-black">{g}</option>
-            ))}
-          </select>
+    <form id="addBookForm" onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <Field label="Title">
+          <Input
+            type="text"
+            name="title"
+            placeholder="Book title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
         </Field>
 
-        {error && <p className="text-red-400 text-sm">{error}</p>}
+        <Field label="Author">
+          <Input
+            name="author"
+            type="text"
+            placeholder="Author name..."
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            required
+          />
+        </Field>
 
-        <div className="flex gap-3 pt-2">
-          <button
-            type="button"
-            onClick={() => setOpenFormBook(false)}
-            className="flex-1 border border-white/20 py-2 text-sm text-white/60 hover:text-white hover:border-white transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="flex-1 bg-primary py-2 text-sm font-bold text-white hover:bg-primary/80 transition-colors zen-dots"
-          >
-            {isUpdating ? "Update" : "Add Book"}
-          </button>
-        </div>
-      </form>
-    </div>
+        <Field label="Total Pages">
+          <Input
+            name="totPages"
+            type="number"
+            placeholder="e.g. 320"
+            value={totalPages}
+            onChange={(e) => setTotalPages(e.target.value)}
+            required
+          />
+        </Field>
+
+        <Field label="Current Page">
+          <Input
+            name="curPages"
+            type="number"
+            placeholder="e.g. 0"
+            value={currentPage}
+            onChange={(e) => setCurrentPage(e.target.value)}
+          />
+        </Field>
+      </div>
+
+      <Field label="Genre">
+        <Select name="genre" value={genre} onChange={(e) => setGenre(e.target.value)}>
+          <option value="" className="bg-surface">— Select genre —</option>
+          {BOOK_GENRES.map((g) => (
+            <option key={g} value={g} className="bg-surface">
+              {g}
+            </option>
+          ))}
+        </Select>
+      </Field>
+
+      {error && <Alert kind="err">{error}</Alert>}
+
+      <div className="flex gap-3 pt-2">
+        <Button
+          type="button"
+          variant="secondary"
+          className="flex-1"
+          onClick={() => setOpenFormBook(false)}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" variant="primary" className="flex-1" loading={submitting}>
+          {isUpdating ? "Update" : "Add Book"}
+        </Button>
+      </div>
+    </form>
   );
 };

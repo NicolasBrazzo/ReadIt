@@ -5,7 +5,6 @@ import { Dashboard } from "./pages/Dashboard";
 import { SignUp } from "./pages/SignUp";
 import { Profile } from "./pages/Profile";
 import { AuthProvider, PrivateRoute } from "./context/AuthProvider";
-import { BooksProvider } from "./context/BooksProvider";
 import { Terms } from "./pages/Terms";
 import { CookiePolicy } from "./pages/CookiePolicy";
 import { Privacy } from "./pages/Privacy";
@@ -17,7 +16,6 @@ function App() {
   return (
     <>
     <AuthProvider>
-      <BooksProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />
@@ -50,7 +48,6 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
-      </BooksProvider>
     </AuthProvider>
     <Analytics/>
     <ToastContainer />

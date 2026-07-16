@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../context/AuthProvider";
-import { useBooks } from "../context/BooksProvider";
+import { useBooksListQuery, useBookStatsQuery } from "../queries/books.queries";
+import {
+  useUpdateBookProgress,
+  useDeleteBook,
+  useToggleBookFavorite,
+} from "../queries/books.mutations";
 import { AddBookForm } from "../components/AddBookForm";
 import { Loader } from "../components/Loader";
 import { BOOK_GENRES, VIEWS } from "../../constants";
@@ -34,9 +39,16 @@ import {
 import {
   abbreviateText,
   capitalizeFirstLetter,
+  getProgress,
 } from "../utils/utilityFunctions";
 import { showSuccess } from "../utils/toast";
 
+// Mappa i tab della UI (VIEWS) sulla "view" attesa dalle query dei libri
+const VIEW_TO_QUERY = {
+  [VIEWS.PROGRESS]: "in_progress",
+  [VIEWS.ALL]: "all",
+  [VIEWS.FINISHED]: "finished",
+};
 
 const StatCard = ({ icon: Icon, label, value, tone }) => {
   const toneClass = tone === "ok" ? "text-ok" : tone === "accent" ? "text-accent" : "text-text";
@@ -59,6 +71,10 @@ export const Dashboard = () => {
   const [expandedBookId, setExpandedBookId] = useState(null);
   const [pendingActions, setPendingActions] = useState(new Set());
 
+  const [filterGenre, setFilterGenre] = useState("");
+  const [filterAuthor, setFilterAuthor] = useState("");
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+
   const isPending = (action, bookId) => pendingActions.has(`${action}-${bookId}`);
   const runWithPending = async (action, bookId, fn) => {
     const key = `${action}-${bookId}`;
@@ -74,46 +90,42 @@ export const Dashboard = () => {
     }
   };
 
-  const { user, loading: authLoading } = useAuth();
-  const {
-    filteredBooks,
-    loading,
-    fetchBooks,
-    fetchFinishedBooks,
-    fetchNotFinishedBooks,
-    updateProgress,
-    deleteBook,
-    getProgress,
-    toggleBookFavorite,
-    filterGenre,
-    setFilterGenre,
-    filterAuthor,
-    setFilterAuthor,
-    showOnlyFavorites,
-    setShowOnlyFavorites,
-    resetFilters,
-    fetchStats,
-    stats,
-  } = useBooks();
+  const { user } = useAuth();
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      fetchNotFinishedBooks();
-    }
-  }, [authLoading, user]);
+  const isStatsView = booksVisualization === VIEWS.STATS;
+  const listView = VIEW_TO_QUERY[booksVisualization] ?? "in_progress";
+
+  const listQuery = useBooksListQuery(listView, { enabled: !isStatsView });
+  const statsQuery = useBookStatsQuery({ enabled: isStatsView });
+
+  const stats = statsQuery.data ?? null;
+  const isContentLoading = isStatsView ? statsQuery.isLoading : listQuery.isLoading;
+
+  const filteredBooks = useMemo(
+    () =>
+      (listQuery.data ?? []).filter((book) => {
+        if (showOnlyFavorites && !book.is_favorite) return false;
+        if (filterGenre && book.genre !== filterGenre) return false;
+        if (filterAuthor && !book.author.toLowerCase().includes(filterAuthor.toLowerCase())) return false;
+        return true;
+      }),
+    [listQuery.data, filterGenre, filterAuthor, showOnlyFavorites]
+  );
+
+  const resetFilters = () => {
+    setFilterGenre("");
+    setFilterAuthor("");
+    setShowOnlyFavorites(false);
+  };
+
+  const updateProgressMutation = useUpdateBookProgress();
+  const deleteMutation = useDeleteBook();
+  const toggleFavoriteMutation = useToggleBookFavorite();
 
   const handleViewChange = (view) => {
     setBooksVisualization(view);
     setExpandedBookId(null);
-    if (view === VIEWS.ALL) fetchBooks();
-    else if (view === VIEWS.PROGRESS) fetchNotFinishedBooks();
-    else if (view === VIEWS.FINISHED) fetchFinishedBooks();
-    else if (view === VIEWS.STATS) fetchStats();
   };
-
-  if (authLoading || loading) {
-    return <Loader fullscreen />;
-  }
 
   if (!user) {
     return null;
@@ -121,19 +133,26 @@ export const Dashboard = () => {
 
   const handleUpdateProgress = (bookId, newPage, totalPages) =>
     runWithPending("progress", bookId, async () => {
-      const result = await updateProgress(bookId, newPage);
-      if (!result.ok) return;
-      if (newPage >= totalPages) {
-        showSuccess("Libro finito! 🎉");
-      } else {
-        showSuccess(`Pagina ${newPage}`, { autoClose: 1000 });
+      try {
+        await updateProgressMutation.mutateAsync({ bookId, currentPage: newPage });
+        if (newPage >= totalPages) {
+          showSuccess("Libro finito! 🎉");
+        } else {
+          showSuccess(`Pagina ${newPage}`, { autoClose: 1000 });
+        }
+      } catch {
+        // errore già mostrato dall'onError della mutation
       }
     });
 
   const handleDeleteBook = (bookId) =>
     runWithPending("delete", bookId, async () => {
-      const result = await deleteBook(bookId);
-      if (result.ok) showSuccess("Libro eliminato");
+      try {
+        await deleteMutation.mutateAsync(bookId);
+        showSuccess("Libro eliminato");
+      } catch {
+        // errore già mostrato dall'onError della mutation
+      }
     });
 
   const handleEditBook = (book) => {
@@ -148,12 +167,18 @@ export const Dashboard = () => {
 
   const handleToggleFavorite = (book) =>
     runWithPending("favorite", book.id, async () => {
-      const result = await toggleBookFavorite(book.id, !book.is_favorite);
-      if (!result.ok) return;
-      showSuccess(
-        book.is_favorite ? "Removed from favorites" : "Added to favorites",
-        { autoClose: 1500 }
-      );
+      try {
+        await toggleFavoriteMutation.mutateAsync({
+          bookId: book.id,
+          isFavorite: !book.is_favorite,
+        });
+        showSuccess(
+          book.is_favorite ? "Removed from favorites" : "Added to favorites",
+          { autoClose: 1500 }
+        );
+      } catch {
+        // errore già mostrato dall'onError della mutation
+      }
     });
 
   const hasActiveFilters = filterGenre || filterAuthor || showOnlyFavorites;
@@ -164,8 +189,6 @@ export const Dashboard = () => {
     { value: VIEWS.FINISHED, label: "Finished", icon: BookMarked, tone: "ok" },
     { value: VIEWS.STATS, label: "Stats", icon: BarChart3 },
   ];
-
-  const isStatsView = booksVisualization === VIEWS.STATS;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -234,8 +257,10 @@ export const Dashboard = () => {
         </div>
         )}
 
-        {/* Stats panel */}
-        {isStatsView ? (
+        {/* Contenuto: solo quest'area mostra il loader, Navbar/Tabs restano sempre visibili */}
+        {isContentLoading ? (
+          <Loader />
+        ) : isStatsView ? (
           !stats ? (
             <EmptyState
               icon={BarChart3}

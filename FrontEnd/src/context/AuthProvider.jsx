@@ -1,6 +1,7 @@
 // src/context/AuthProvider.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import api from "../api/client";
 
 // Cosa fa: crea il context React che conterrà user, loading, login (e logout se aggiunto).
@@ -12,6 +13,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(undefined);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     checkAuth();
@@ -97,6 +99,7 @@ export function AuthProvider({ children }) {
 
     localStorage.removeItem("token");
     setUser(null);
+    queryClient.clear();
   };
 
   // Aggiorna profilo (nome, avatar_url)

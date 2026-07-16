@@ -1,5 +1,13 @@
 import { toast } from "react-toastify";
 
+// Centralizza il toast d'errore per tutte le mutazioni. Gli errori 401
+// non vengono mostrati: l'utente sta uscendo / sessione scaduta, il
+// redirect è già gestito altrove.
+export const handleMutationError = (err, fallback) => {
+  if (err.response?.status === 401) return;
+  showError(err.response?.data?.error || err.message || fallback);
+};
+
 // Toast di successo
 export const showSuccess = (message, options = {}) => {
   toast.success(message, {

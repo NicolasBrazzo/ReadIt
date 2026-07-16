@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useBooks } from "../context/BooksProvider";
+import { useCreateBook, useUpdateBook } from "../queries/books.mutations";
 import { BOOK_GENRES } from "../../constants";
 import { Field } from "./ui/Field";
 import { Input } from "./ui/Input";
@@ -13,10 +13,11 @@ export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
   const [totalPages, setTotalPages] = useState("");
   const [currentPage, setCurrentPage] = useState("0");
   const [genre, setGenre] = useState("");
-  const { createBook, updateBook } = useBooks();
+  const createMutation = useCreateBook();
+  const updateMutation = useUpdateBook();
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  const submitting = createMutation.isPending || updateMutation.isPending;
 
   useEffect(() => {
     if (bookToEdit) {
@@ -31,7 +32,7 @@ export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
+    setError("");
 
     const bookData = {
       title,
@@ -41,21 +42,20 @@ export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
       genre: genre || null,
     };
 
-    const result = isUpdating && bookToEdit
-      ? await updateBook(bookToEdit.id, bookData)
-      : await createBook(bookData);
-
-    setSubmitting(false);
-
-    if (result.ok) {
+    try {
+      if (isUpdating && bookToEdit) {
+        await updateMutation.mutateAsync({ bookId: bookToEdit.id, bookData });
+      } else {
+        await createMutation.mutateAsync(bookData);
+      }
       setTitle("");
       setAuthor("");
       setTotalPages("");
       setCurrentPage("0");
       setGenre("");
       setOpenFormBook(false);
-    } else {
-      setError(result.message);
+    } catch (err) {
+      setError(err.response?.data?.error || err.message);
     }
   };
 

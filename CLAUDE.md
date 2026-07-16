@@ -37,11 +37,11 @@ npm start        # Production server
 
 ### Frontend
 
-**State Management**: React Context API only (no Redux/Zustand).
+**State Management**: React Context API for global client state (no Redux/Zustand); TanStack Query for server state.
 - `AuthProvider` (`context/`) — user auth state, login/logout/register
-- `BooksProvider` (`context/`) — books list, CRUD, filtering by status
+- Books data (list views + stats) is server state managed by TanStack Query, not Context — see `queries/books.queries.js` (query key factory + `useQuery` hooks, keyed per view: `all`/`finished`/`in_progress`/`stats`) and `queries/books.mutations.js` (`useMutation` hooks for create/update/progress/favorite/delete, with cache invalidation). Client-only UI state (filters, favorites-only toggle) lives locally in `pages/Dashboard.jsx`. `QueryClient` is instantiated in `api/queryClient.js` and provided in `main.jsx`.
 
-**API Client**: Single Axios instance in `api/client.js` with a request interceptor that automatically attaches the JWT Bearer token from localStorage to all requests.
+**API Client**: Single Axios instance in `api/client.js` with a request interceptor that automatically attaches the JWT Bearer token from localStorage to all requests. Used both directly by `AuthProvider` and as the fetcher inside TanStack Query's `queryFn`/`mutationFn`.
 
 **Routing** (`App.jsx`): `BrowserRouter` with a `PrivateRoute` wrapper guarding `/dashboard`. All unknown routes redirect to `/`.
 

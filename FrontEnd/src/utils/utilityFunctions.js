@@ -9,6 +9,12 @@ export const abbreviateText = (text, maxLength = 25) => {
     return text.slice(0, maxLength) + "..."
 }
 
+// Calcola la percentuale di lettura di un libro
+export function getProgress(book) {
+  if (!book.total_pages) return 0;
+  return Math.round((book.current_page / book.total_pages) * 100);
+}
+
 // Rendi maiuscola la prima lettera di una stringa
 export function capitalizeFirstLetter(str) {
   // Controlla se la stringa non è vuota

@@ -9,7 +9,7 @@ const createBook = async (userId, title, author, totalPages, currentPage, genre 
   }
 
   const { data, error } = await supabase
-    .from('books')
+    .from('read_books')
     .insert([
       {
         user_id: userId,
@@ -35,7 +35,7 @@ const getBooksByUserId = async (userId) => {
   }
   
   const { data, error } = await supabase
-    .from('books')
+    .from('read_books')
     .select('*')
     .eq('user_id', userId);
 
@@ -55,7 +55,7 @@ const getNotFinishedBooksByUserId = async (userId) => {
   }
 
   const { data, error } = await supabase
-    .from('books')
+    .from('read_books')
     .select('*')
     .eq('user_id', userId);
 
@@ -73,7 +73,7 @@ const getFinishedBooksByUserId = async (userId) => {
   }
   
   const { data, error } = await supabase
-    .from('books_finished')
+    .from('read_books_finished')
     .select('*')
     .eq('user_id', userId);
   if (error) throw error;
@@ -85,7 +85,7 @@ const getFinishedBooksByUserId = async (userId) => {
  */
 const getBookById = async (bookId) => {
   const { data, error } = await supabase
-    .from('books')
+    .from('read_books')
     .select('*')
     .eq('id', bookId)
     .single();
@@ -101,7 +101,7 @@ const updateBook = async (bookId, title, author, totalPages, currentPage, genre 
     throw new Error('current_page cannot exceed total_pages');
   }
   const { data, error } = await supabase
-    .from('books')
+    .from('read_books')
     .update({
       title,
       author,
@@ -121,7 +121,7 @@ const updateBook = async (bookId, title, author, totalPages, currentPage, genre 
  */
 const updateCurrentPage = async (bookId, currentPage) => {
   const { data, error } = await supabase
-    .from('books')
+    .from('read_books')
     .update({ current_page: currentPage })
     .eq('id', bookId)
     .select()
@@ -135,7 +135,7 @@ const updateCurrentPage = async (bookId, currentPage) => {
  */
 const toggleFavorite = async (bookId, isFavorite) => {
   const { data, error } = await supabase
-    .from('books')
+    .from('read_books')
     .update({ is_favorite: isFavorite })
     .eq('id', bookId)
     .select()
@@ -153,7 +153,7 @@ const getFavoriteBooks = async (userId) => {
   }
 
   const { data, error } = await supabase
-    .from('books')
+    .from('read_books')
     .select('*')
     .eq('user_id', userId)
     .eq('is_favorite', true);
@@ -172,7 +172,7 @@ const getStatsByUserId = async (userId) => {
   }
 
   const { data: books, error } = await supabase
-    .from('books')
+    .from('read_books')
     .select('*')
     .eq('user_id', userId);
 
@@ -244,7 +244,7 @@ const getStatsByUserId = async (userId) => {
  */
 const deleteBook = async (bookId) => {
   const { error } = await supabase
-    .from('books')
+    .from('read_books')
     .delete()
     .eq('id', bookId);
   if (error) throw error;

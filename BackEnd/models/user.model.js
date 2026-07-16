@@ -5,7 +5,7 @@ const supabase = require('../config/db_connection');
  */
 const createUser = async (name, email, hashedPassword) => {
   const { data, error } = await supabase
-    .from('users')
+    .from('read_users')
     .insert([
       {
         name,
@@ -28,7 +28,7 @@ const createUser = async (name, email, hashedPassword) => {
  */
 const findUserByEmail = async (email) => {
   const { data, error } = await supabase
-    .from('users')
+    .from('read_users')
     .select('*')
     .eq('email', email)
     .single();
@@ -45,7 +45,7 @@ const findUserByEmail = async (email) => {
  */
 const findUserById = async (id) => {
   const { data, error } = await supabase
-    .from('users')
+    .from('read_users')
     .select('*')
     .eq('id', id)
     .single();
@@ -62,7 +62,7 @@ const findUserById = async (id) => {
  */
 const updateUser = async (id, fields) => {
   const { data, error } = await supabase
-    .from('users')
+    .from('read_users')
     .update(fields)
     .eq('id', id)
     .select('id, name, email, avatar_url')
@@ -77,7 +77,7 @@ const updateUser = async (id, fields) => {
  */
 const updatePassword = async (id, hashedPassword) => {
   const { error } = await supabase
-    .from('users')
+    .from('read_users')
     .update({ password: hashedPassword })
     .eq('id', id);
 

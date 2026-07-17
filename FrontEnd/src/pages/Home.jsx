@@ -1,22 +1,12 @@
 import "../slider.css";
 import { Navbar } from "../components/Navbar";
-import { MoveRight } from "lucide-react";
 import { useHomeAnimations } from "../hooks/useAnimations";
-import { useRef } from "react";
-import { useMoveButtonAnimation } from "../hooks/useMoveButtonAnimation";
 import { Slider } from "../components/Slider";
 import { UsageSection } from "../components/UsageSection";
 import { Footer } from "../components/Footer";
 
 export const Home = () => {
   useHomeAnimations();
-
-  const containerMovePageButtonRef = useRef(null);
-  const movePageButtonRef = useRef(null);
-  useMoveButtonAnimation({
-    containerRef: containerMovePageButtonRef,
-    buttonRef: movePageButtonRef,
-  });
 
   return (
     <div className="flex flex-col">
@@ -44,25 +34,6 @@ export const Home = () => {
           Welcome to the new application, where reading becomes a delightful
           experience.
         </p>
-
-        <div
-          ref={containerMovePageButtonRef}
-          id="container-move-page-button"
-          className="w-[80vw] absolute bottom-0 flex justify-end"
-        >
-          <button
-            onClick={() => {
-              document
-                .getElementById("slider-section")
-                ?.scrollIntoView({ behavior: "smooth" });
-            }}
-            ref={movePageButtonRef}
-            id="move-page-button"
-            className="circle-cta rotate-90 h-20 w-20 md:h-25 md:w-25 flex-center-center shadow-2"
-          >
-            <MoveRight className="text-accent-contrast" />
-          </button>
-        </div>
       </div>
 
       <Slider />

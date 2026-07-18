@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Navbar } from "../components/Navbar";
-import { Footer } from "../components/Footer";
 import { useAuth } from "../context/AuthProvider";
 import { LogOut } from "lucide-react";
 import { Card } from "../components/ui/Card";
@@ -79,28 +77,26 @@ export const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
+    <div className="flex-1 px-5 md:px-10 my-8 flex flex-col items-center min-h-[80vh]">
+      <div className="w-full max-w-5xl flex flex-col gap-8">
 
-      <div className="flex-1 px-5 md:px-10 my-8 flex flex-col items-center min-h-[80vh]">
-        <div className="w-full max-w-3xl flex flex-col gap-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <h1 className="text-h1 text-text">
+            <span className="text-accent">My</span> Profile
+          </h1>
+          <Button variant="secondary" size="sm" icon={LogOut} onClick={() => logout()}>
+            Logout
+          </Button>
+        </div>
 
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <h1 className="text-h1 text-text">
-              <span className="text-accent">My</span> Profile
-            </h1>
-            <Button variant="secondary" size="sm" icon={LogOut} onClick={() => logout()}>
-              Logout
-            </Button>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 md:items-start gap-6">
           {/* Personal Data */}
           <Card className="p-6 flex flex-col gap-6">
             <h2 className="text-h2 text-text">Personal Data</h2>
 
             <div className="flex items-center gap-5">
-              <Avatar src={avatarUrl} name={name || user?.email} size="lg" />
+              <Avatar src={avatarUrl} name={name || user?.email} size="lg" className="ring-2 ring-accent-soft" />
               <div className="text-[14px] text-text-2">
                 <p>{user?.email}</p>
               </div>
@@ -202,8 +198,6 @@ export const Profile = () => {
           </Card>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };

@@ -5,6 +5,8 @@ import { Dashboard } from "./pages/Dashboard";
 import { SignUp } from "./pages/SignUp";
 import { Profile } from "./pages/Profile";
 import { AuthProvider, PrivateRoute } from "./context/AuthProvider";
+import { ThemeProvider } from "./context/ThemeProvider";
+import { Layout } from "./components/Layout";
 import { Terms } from "./pages/Terms";
 import { CookiePolicy } from "./pages/CookiePolicy";
 import { Privacy } from "./pages/Privacy";
@@ -15,40 +17,44 @@ import "react-toastify/dist/ReactToastify.css";
 function App() {
   return (
     <>
-    <AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
+            <Route element={<Layout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
 
-            <Route path="/terms" element={<Terms/>}/>
-            <Route path="/cookie-policy" element={<CookiePolicy/>}/>
-            <Route path="/privacy-policy" element={<Privacy/>}/>
+              <Route path="/terms" element={<Terms/>}/>
+              <Route path="/cookie-policy" element={<CookiePolicy/>}/>
+              <Route path="/privacy-policy" element={<Privacy/>}/>
 
-            {/* rotte protette */}
-            <Route
-              path="/dashboard"
-              element={
-                <PrivateRoute>
-                  <Dashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <PrivateRoute>
-                  <Profile />
-                </PrivateRoute>
-              }
-            />
+              {/* rotte protette */}
+              <Route
+                path="/dashboard"
+                element={
+                  <PrivateRoute>
+                    <Dashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <Profile />
+                  </PrivateRoute>
+                }
+              />
 
-            {/* fallback semplice */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+              {/* fallback semplice */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
           </Routes>
         </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
     <Analytics/>
     <ToastContainer />
     </>

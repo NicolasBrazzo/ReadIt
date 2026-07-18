@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import api from "../api/client";
+import { Loader } from "../components/Loader";
 
 // Cosa fa: crea il context React che conterrà user, loading, login (e logout se aggiunto).
 // Quando è usato: al momento del rendering, permette ai componenti figli di accedere ai dati di autenticazione tramite useContext.
@@ -144,7 +145,7 @@ export function useAuth() {
 export function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loader fullscreen />;
   if (!user) return <Navigate to="/login" replace />;
 
   return children;

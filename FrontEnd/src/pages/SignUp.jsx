@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { Navbar } from "../components/Navbar";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
-import { Footer } from "../components/Footer";
 import { Form } from "../components/Form";
 import { signupInputs } from "../../constants";
 import { Button } from "../components/ui/Button";
@@ -43,30 +41,28 @@ export const SignUp = () => {
   };
 
   return (
-    <div>
-      <Navbar />
-      <div className="p-6 flex-center-col mb-10 min-h-screen">
-        <h1 className="text-display text-text text-center my-5">
-          <span className="text-accent">S</span>ign
-          <span className="text-accent">U</span>p
-        </h1>
-        <div className="w-full flex flex-col gap-10 mt-5 items-center">
+    <div className="flex-1 lg:grid lg:grid-cols-2">
+      <div className="hidden lg:flex flex-col justify-center gap-6 bg-surface-2 px-16 relative overflow-hidden">
+        <div className="circle w-16 h-16 absolute -top-8 -left-8 opacity-80"></div>
+        <h2 className="font-black text-text text-6xl tracking-tight relative">
+          Read<span className="text-accent">-It</span>
+        </h2>
+        <p className="text-text-2 text-lead max-w-sm relative">
+          Create your account and start turning every book you open into
+          tracked, visible progress.
+        </p>
+      </div>
+
+      <div className="flex flex-col items-center justify-center px-4 sm:px-6 py-12 sm:py-16">
+        <div className="w-full max-w-[500px] flex flex-col gap-6">
+          <h1 className="text-display text-text">
+            <span className="text-accent">S</span>ign
+            <span className="text-accent">U</span>p
+          </h1>
+
           <Form inputs={signupInputs} onChange={handleChange} state={values} />
-          <p className="text-center text-[16px] text-text-2">
-            You just have an account? <br />{" "}
-            <Link
-              to={"/login"}
-              className="text-accent hover:text-accent-deep underline"
-            >
-              Login
-            </Link>
-          </p>
-          <Button onClick={handleSubmit} loading={loading} size="lg">
-            SignUp
-          </Button>
-        </div>
-        {result && result !== "SUCCESS" && (
-          <div className="mt-4 w-full max-w-[500px]">
+
+          {result && result !== "SUCCESS" && (
             <Alert kind="err" title={result}>
               {errorDetails.length > 0 && (
                 <ul className="mt-1 list-disc list-inside">
@@ -76,10 +72,23 @@ export const SignUp = () => {
                 </ul>
               )}
             </Alert>
-          </div>
-        )}
+          )}
+
+          <Button onClick={handleSubmit} loading={loading} size="lg" className="w-full">
+            SignUp
+          </Button>
+
+          <p className="text-center text-[15px] text-text-2">
+            You just have an account?{" "}
+            <Link
+              to={"/login"}
+              className="text-accent hover:text-accent-deep underline"
+            >
+              Login
+            </Link>
+          </p>
+        </div>
       </div>
-      <Footer />
     </div>
   );
 };

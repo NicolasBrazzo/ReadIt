@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { Navbar } from "../components/Navbar";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
-import { Footer } from "../components/Footer";
 import { Form } from "../components/Form";
 import { loginInputs } from "../../constants";
 import { Button } from "../components/ui/Button";
@@ -36,19 +34,34 @@ export const Login = () => {
   };
 
   return (
-    <div>
-      <Navbar />
+    <div className="flex-1 lg:grid lg:grid-cols-2">
+      <div className="hidden lg:flex flex-col justify-center gap-6 bg-surface-2 px-16 relative overflow-hidden">
+        <div className="circle w-16 h-16 absolute -top-8 -left-8 opacity-80"></div>
+        <h2 className="font-black text-text text-6xl tracking-tight relative">
+          Read<span className="text-accent">-It</span>
+        </h2>
+        <p className="text-text-2 text-lead max-w-sm relative">
+          Track what you read, keep your progress in one place, and turn
+          reading into a habit that sticks.
+        </p>
+      </div>
 
-      <div className="p-6 flex-center-col mb-10 min-h-[80vh]">
-        <h1 className="text-display text-text text-center my-5">
-          Lo<span className="text-accent">g</span>in
-        </h1>
+      <div className="flex flex-col items-center justify-center px-4 sm:px-6 py-12 sm:py-16">
+        <div className="w-full max-w-[500px] flex flex-col gap-6">
+          <h1 className="text-display text-text">
+            Lo<span className="text-accent">g</span>in
+          </h1>
 
-        <div className="w-full flex flex-col gap-5 mt-5 items-center">
           <Form inputs={loginInputs} onChange={handleChange} state={values} />
 
-          <p className="text-center text-[16px] text-text-2">
-            You don't have an account? <br />{" "}
+          {result && result !== "SUCCESS" && <Alert kind="err">{result}</Alert>}
+
+          <Button onClick={handleSubmit} loading={loading} size="lg" className="w-full">
+            Login
+          </Button>
+
+          <p className="text-center text-[15px] text-text-2">
+            You don't have an account?{" "}
             <Link
               to={"/signup"}
               className="text-accent hover:text-accent-deep underline"
@@ -56,20 +69,8 @@ export const Login = () => {
               SignUp
             </Link>
           </p>
-
-          <Button onClick={handleSubmit} loading={loading} size="lg">
-            Login
-          </Button>
         </div>
-
-        {result && result !== "SUCCESS" && (
-          <div className="mt-4 w-full max-w-[500px]">
-            <Alert kind="err">{result}</Alert>
-          </div>
-        )}
       </div>
-
-      <Footer />
     </div>
   );
 };

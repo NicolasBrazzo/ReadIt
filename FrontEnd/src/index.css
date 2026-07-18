@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
-  Design tokens — "Tre" design system, light mode only.
+  Design tokens — "Tre" design system.
 */
 @theme {
   /* Neutri */
@@ -71,6 +71,40 @@
   --dot: rgba(28, 26, 22, .055);
 }
 
+html[data-theme="dark"] {
+  /* Neutri */
+  --color-bg: #17130F;
+  --color-surface: #1F1A15;
+  --color-surface-2: #2A241C;
+  --color-border: #3A3229;
+  --color-text: #F3EEE6;
+  --color-text-2: #B7AE9F;
+  --color-text-3: #8A8171;
+
+  /* Accento — Terracotta: resta invariato per identità di brand, solo il derivato "deep" si schiarisce per restare leggibile in hover su sfondo scuro */
+  --color-accent: #C2592F;
+  --color-accent-deep: #DE7A4C;
+  --color-accent-soft: #3A2116;
+  --color-accent-text: #F0AE86;
+  --color-accent-contrast: #FFFFFF;
+
+  /* Semantici */
+  --color-ok: #3FAE7C;
+  --color-ok-soft: #1C3327;
+  --color-warn: #DDA23F;
+  --color-warn-soft: #382A15;
+  --color-err: #E27272;
+  --color-err-soft: #3A1E1E;
+  --color-info: #6C9CEE;
+  --color-info-soft: #1E2A3F;
+
+  --dot: rgba(255, 255, 255, .05);
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .45);
+  --shadow-2: 0 8px 22px rgba(0, 0, 0, .55);
+  --shadow-3: 0 22px 54px rgba(0, 0, 0, .65);
+}
+
 @keyframes overlayIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -138,17 +172,21 @@ button {
 }
 
 /* NAVBAR */
-.link:hover .line-navbar {
+.link:hover .line-navbar,
+.link.active .line-navbar {
   display: block;
   width: 100%;
 }
 
 .line-navbar {
+  position: absolute;
+  left: 0;
+  bottom: -6px;
   display: block;
   width: 0;
   height: 2px;
   background: var(--color-accent);
-  transition: width 0.5s ease-out;
+  transition: width 0.3s ease-out;
 }
 
 .circle,
@@ -165,10 +203,20 @@ button {
 }
 
 #usage-section {
-  background-image: url("./assets/usage-bg.webp");
+  background-image: url("./assets/usage-bg-mobile.webp");
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+}
+
+@media (min-width: 768px) {
+  #usage-section {
+    background-image: url("./assets/usage-bg.webp");
+  }
+}
+
+html[data-theme="dark"] #usage-section {
+  filter: brightness(0.65) saturate(0.9);
 }
 
 /* TOAST — restyling react-toastify sui token del design system */

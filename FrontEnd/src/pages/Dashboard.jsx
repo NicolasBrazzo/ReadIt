@@ -1,6 +1,4 @@
 import { useMemo, useState } from "react";
-import { Navbar } from "../components/Navbar";
-import { Footer } from "../components/Footer";
 import { useAuth } from "../context/AuthProvider";
 import { useBooksListQuery, useBookStatsQuery } from "../queries/books.queries";
 import {
@@ -50,12 +48,23 @@ const VIEW_TO_QUERY = {
   [VIEWS.FINISHED]: "finished",
 };
 
-const StatCard = ({ icon: Icon, label, value, tone }) => {
+const STAT_CHIP_CLASSES = {
+  ok: "bg-ok-soft text-ok",
+  accent: "bg-accent-soft text-accent-text",
+  neutral: "bg-surface-2 text-text-2",
+};
+
+const StatCard = ({ icon: Icon, label, value, tone = "neutral" }) => {
   const toneClass = tone === "ok" ? "text-ok" : tone === "accent" ? "text-accent" : "text-text";
   return (
-    <Card className="p-5 flex flex-col gap-2">
-      <div className="flex items-center gap-2 text-text-3 text-[11px] uppercase tracking-wide font-mono">
-        <Icon size={14} /> {label}
+    <Card lift className="p-5 flex flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <span className={`flex items-center justify-center w-9 h-9 rounded-full ${STAT_CHIP_CLASSES[tone]}`}>
+          {Icon && <Icon size={16} />}
+        </span>
+        <span className="text-text-3 text-[11px] uppercase tracking-wide font-mono">
+          {label}
+        </span>
       </div>
       <span className={`text-3xl md:text-4xl font-black ${toneClass}`}>
         {value}
@@ -191,17 +200,20 @@ export const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-
-      <div className="flex-1 mx-5 md:mx-10 my-8 flex flex-col gap-8 min-h-[80vh]">
+    <>
+    <div className="flex-1 mx-5 md:mx-10 my-8 flex flex-col gap-8 min-h-[80vh]">
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <h1 className="text-h1 text-text">
-            <span className="text-accent">Welcome</span>{" "}
-            {capitalizeFirstLetter(user?.name)}
-          </h1>
+          <div>
+            <h1 className="text-h1 text-text">
+              <span className="text-accent">Welcome</span>{" "}
+              {capitalizeFirstLetter(user?.name)}
+            </h1>
+            <p className="text-text-2 text-[14px] mt-1">
+              Here's where your reading progress lives.
+            </p>
+          </div>
           <Button icon={Plus} onClick={() => { setBookToEdit(null); setOpenFormBook(true); }}>
             Add Book
           </Button>
@@ -212,7 +224,7 @@ export const Dashboard = () => {
 
         {/* Filters — nascosti in vista Stats */}
         {!isStatsView && (
-        <div className="flex flex-wrap gap-3 items-center">
+        <div className="flex flex-wrap gap-3 items-center bg-surface-2/60 border border-border rounded-field p-2">
           <div className="w-48">
             <Select
               value={filterGenre}
@@ -239,7 +251,7 @@ export const Dashboard = () => {
             className={`flex items-center gap-2 px-4 py-2.5 rounded-field border text-[13px] font-mono transition-colors ${
               showOnlyFavorites
                 ? "border-accent bg-accent-soft text-accent-text"
-                : "border-border text-text-2 hover:border-text-3 hover:text-text"
+                : "border-border bg-surface text-text-2 hover:border-text-3 hover:text-text"
             }`}
           >
             <Heart size={14} fill={showOnlyFavorites ? "currentColor" : "none"} />
@@ -347,7 +359,7 @@ export const Dashboard = () => {
               const isFinished = book.current_page === book.total_pages;
 
               return (
-                <Card key={book.id} className="flex flex-col overflow-hidden">
+                <Card key={book.id} lift className="flex flex-col overflow-hidden">
                   {/* Card header — always visible */}
                   <div className="p-4 flex flex-col gap-3">
                     <div className="flex justify-between items-start gap-2">
@@ -441,16 +453,14 @@ export const Dashboard = () => {
         )}
       </div>
 
-      <Modal
-        open={openFormBook}
-        onClose={handleCloseForm}
-        title={bookToEdit ? "Edit Book" : "Add New Book"}
-        size="lg"
-      >
-        <AddBookForm setOpenFormBook={handleCloseForm} bookToEdit={bookToEdit} />
-      </Modal>
-
-      <Footer />
-    </div>
+    <Modal
+      open={openFormBook}
+      onClose={handleCloseForm}
+      title={bookToEdit ? "Edit Book" : "Add New Book"}
+      size="lg"
+    >
+      <AddBookForm setOpenFormBook={handleCloseForm} bookToEdit={bookToEdit} />
+    </Modal>
+    </>
   );
 };

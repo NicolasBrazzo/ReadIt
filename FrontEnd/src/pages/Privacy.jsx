@@ -1,11 +1,6 @@
-import { Navbar } from "../components/Navbar";
-import { Footer } from "../components/Footer";
-
 export const Privacy = () => {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <div className="flex-1 w-full max-w-4xl mx-auto px-6 py-12">
+    <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 md:px-10 py-8 md:py-12">
         <h1 className="text-h1 text-text mb-8 text-center">
           Privacy Policy – ReadIt
         </h1>
@@ -223,8 +218,6 @@ export const Privacy = () => {
             Ultimo aggiornamento: {new Date().toLocaleDateString("it-IT")}
           </p>
         </div>
-      </div>
-      <Footer />
     </div>
   );
 };

@@ -7,7 +7,7 @@ import { Select } from "./ui/Select";
 import { Button } from "./ui/Button";
 import { Alert } from "./ui/Alert";
 
-export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
+export const AddBookForm = ({ onClose, bookToEdit = null }) => {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [totalPages, setTotalPages] = useState("");
@@ -53,7 +53,7 @@ export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
       setTotalPages("");
       setCurrentPage("0");
       setGenre("");
-      setOpenFormBook(false);
+      onClose();
     } catch (err) {
       setError(err.response?.data?.error || err.message);
     }
@@ -124,7 +124,7 @@ export const AddBookForm = ({ setOpenFormBook, bookToEdit = null }) => {
           type="button"
           variant="secondary"
           className="flex-1"
-          onClick={() => setOpenFormBook(false)}
+          onClick={onClose}
         >
           Cancel
         </Button>

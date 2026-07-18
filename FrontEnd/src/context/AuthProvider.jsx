@@ -1,16 +1,11 @@
-// src/context/AuthProvider.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import api from "../api/client";
 import { Loader } from "../components/Loader";
 
-// Cosa fa: crea il context React che conterrà user, loading, login (e logout se aggiunto).
-// Quando è usato: al momento del rendering, permette ai componenti figli di accedere ai dati di autenticazione tramite useContext.
-// Effetto: nessun effetto runtime, solo la creazione di un contenitore.
 const AuthContext = createContext(null);
 
-// Incapsulatore dello stato e della logica auth
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(undefined);
   const [loading, setLoading] = useState(true);
@@ -46,7 +41,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // SIGNUP
   const register = async (credentials) => {
   try {
     const res = await api.post("/register", credentials);
@@ -55,31 +49,27 @@ export function AuthProvider({ children }) {
       await checkAuth();
       return { ok: true };
     }
-    return { 
-      ok: false, 
+    return {
+      ok: false,
       message: res.data?.error || "Registration failed",
-      details: res.data?.details || [] // ✅ Passa i dettagli degli errori
+      details: res.data?.details || []
     };
   } catch (err) {
     console.error("Register error:", err);
-    return { 
-      ok: false, 
+    return {
+      ok: false,
       message: err.response?.data?.error || err.message,
-      details: err.response?.data?.details || [] // ✅ Passa i dettagli degli errori
+      details: err.response?.data?.details || []
     };
   }
 };
 
-  // LOGIN
   const login = async (credentials) => {
     try {
       const res = await api.post("/login", credentials);
 
       if (res.data?.message === "Success" && res.data?.token) {
-        // Salva il token
         localStorage.setItem("token", res.data.token);
-
-        // Ricontrolla l'auth per popolare user
         await checkAuth();
         return { ok: true };
       }
@@ -95,7 +85,7 @@ export function AuthProvider({ children }) {
     try {
       await api.post("/logout");
     } catch (e) {
-      // Ignora errori dal backend
+      // L'utente esce comunque anche se la chiamata al backend fallisce
     }
 
     localStorage.removeItem("token");
@@ -103,7 +93,6 @@ export function AuthProvider({ children }) {
     queryClient.clear();
   };
 
-  // Aggiorna profilo (nome, avatar_url)
   const updateUserProfile = async (data) => {
     try {
       const res = await api.put("/profile", data);
@@ -116,7 +105,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Cambia password
   const changePassword = async (data) => {
     try {
       await api.patch("/profile/password", data);
@@ -141,7 +129,6 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-// PrivateRoute component (da usare come wrapper attorno alle rotte protette)
 export function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
 

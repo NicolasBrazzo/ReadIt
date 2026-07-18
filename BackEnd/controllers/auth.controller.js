@@ -1,18 +1,3 @@
-// gestisce validazione, hash, token
-// **Cosa fa**: Contiene tutta la **logica dell'applicazione**
-// **Perché separato**:
-// - È il "cervello" dell'app: decide cosa fare e in che ordine
-// - Coordina model, librerie (bcrypt, jwt), validazione
-// - Se cambi la logica (es: invio email di conferma), modifichi solo qui
-// **Quando viene usato**: Quando una route riceve una richiesta
-// **Flusso completo**:
-
-// User clicca "Register"
-// → Frontend chiama POST /register
-// → Route riceve la richiesta
-// → Controller.register() fa tutta la logica
-// → Model salva nel DB
-// → Controller risponde al frontend
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { createUser, findUserByEmail, findUserById, updateUser, updatePassword } = require("../models/user.model");
@@ -23,7 +8,6 @@ const {
   COOKIE_OPTIONS,
 } = require("../config/jwt");
 
-// Funzione helper per validare la password
 const validatePassword = (password) => {
   const errors = [];
 
@@ -49,16 +33,13 @@ const validatePassword = (password) => {
 const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    // Validazione input
     if (!name || !email || !password) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-    // Validazione email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ error: "Invalid email format" });
     }
-    // Validazione password con controlli più severi
     const passwordErrors = validatePassword(password);
     if (passwordErrors.length > 0) {
       return res.status(400).json({
@@ -67,16 +48,12 @@ const register = async (req, res) => {
       });
     }
 
-    // Controlla se email esiste già
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
       return res.status(400).json({ error: "Email already registered" });
     }
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-    // Crea utente
     const result = await createUser(name, email, hashedPassword);
-    // Genera JWT
     const token = jwt.sign({ name, id: result.id }, JWT_SECRET, {
       expiresIn: JWT_EXPIRES_IN,
     });
@@ -85,7 +62,6 @@ const register = async (req, res) => {
       token,
     });
   } catch (error) {
-    // console.error("❌ Register error:", error);
     return res.status(500).json({ error: "Registration failed" });
   }
 };
@@ -93,22 +69,18 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    // Validazione input
     if (!email || !password) {
       return res.status(400).json({ error: "Missing credentials" });
     }
-    // Trova utente
     const user = await findUserByEmail(email);
     if (!user) {
       return res.status(400).json({ error: "Invalid credentials" });
     }
-    // Verifica password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
-    // Genera JWT
     const token = jwt.sign({ name: user.name, id: user.id }, JWT_SECRET, {
       expiresIn: JWT_EXPIRES_IN,
     });

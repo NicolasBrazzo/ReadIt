@@ -12,6 +12,19 @@ const {
   deleteBook,
 } = require("../models/books.model");
 
+const validatePageRange = (totalPages, currentPage) => {
+  if (totalPages <= 0) {
+    return "Total pages must be greater than 0";
+  }
+  if (currentPage < 0) {
+    return "Current page cannot be negative";
+  }
+  if (currentPage > totalPages) {
+    return "Current page cannot be greater than total pages";
+  }
+  return null;
+};
+
 // GET /books - Ottieni tutti i libri dell'utente loggato
 const getUserBooks = async (req, res) => {
   try {
@@ -127,18 +140,9 @@ const createNewBook = async (req, res) => {
       return res.status(400).json({ error: "Invalid current page number" });
     }
 
-    if (totalPagesNum <= 0) {
-      return res.status(400).json({ error: "Total pages must be greater than 0" });
-    }
-
-    if (currentPageNum < 0) {
-      return res.status(400).json({ error: "Current page cannot be negative" });
-    }
-
-    if (currentPageNum > totalPagesNum) {
-      return res
-        .status(400)
-        .json({ error: "Current page cannot be greater than total pages" });
+    const pageRangeError = validatePageRange(totalPagesNum, currentPageNum);
+    if (pageRangeError) {
+      return res.status(400).json({ error: pageRangeError });
     }
 
     const book = await createBook(
@@ -189,18 +193,9 @@ const updateBookInfo = async (req, res) => {
       return res.status(400).json({ error: "Invalid number format" });
     }
 
-    if (totalPagesNum <= 0) {
-      return res.status(400).json({ error: "Total pages must be greater than 0" });
-    }
-
-    if (currentPageNum < 0) {
-      return res.status(400).json({ error: "Current page cannot be negative" });
-    }
-
-    if (currentPageNum > totalPagesNum) {
-      return res
-        .status(400)
-        .json({ error: "Current page cannot be greater than total pages" });
+    const pageRangeError = validatePageRange(totalPagesNum, currentPageNum);
+    if (pageRangeError) {
+      return res.status(400).json({ error: pageRangeError });
     }
 
     // Verifica che il libro esista e appartenga all'utente
